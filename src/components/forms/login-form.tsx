@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -33,9 +32,16 @@ import {
 } from "@/components/ui/field"
 
 export function LoginForm({
+  openSignupTab,
+  openEmailVerificationTab,
+  openForgotPasswordTab,
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: {
+  openSignupTab: () => void
+  openEmailVerificationTab: (email: string) => void
+  openForgotPasswordTab: () => void
+} & React.ComponentProps<"div">) {
   const router = useRouter()
   const {
     control,
@@ -56,6 +62,8 @@ export function LoginForm({
       { ...data, callbackURL: "/" },
       {
         onError: (error) => {
+          if (error.error.code === "EMAIL_NOT_VERIFIED")
+            openEmailVerificationTab(data.email)
           toast.error(error.error.message || "Failed to sign in")
         },
         onSuccess: () => {
@@ -86,6 +94,7 @@ export function LoginForm({
                   Login with Google
                 </Button>
               </Field>
+
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
@@ -114,7 +123,17 @@ export function LoginForm({
                 name="password"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                      <Button
+                        variant="link"
+                        className="p-0 ml-auto text-sm underline-offset-4 hover:underline cursor-pointer"
+                        onClick={openForgotPasswordTab}
+                      >
+                        Forgot your password?
+                      </Button>
+                    </div>
+
                     <PasswordInput
                       {...field}
                       id={field.name}
@@ -151,7 +170,13 @@ export function LoginForm({
 
                   <FieldDescription className="px-6 text-center">
                     Don&apos;t have an account?{" "}
-                    <Link href="/auth/signup">Sign up</Link>
+                    <Button
+                      variant="link"
+                      className="p-0 text-sm underline-offset-4 hover:underline text-muted-foreground hover:text-accent-foreground cursor-pointer"
+                      onClick={openSignupTab}
+                    >
+                      Sign up
+                    </Button>
                   </FieldDescription>
                 </Field>
               </FieldGroup>

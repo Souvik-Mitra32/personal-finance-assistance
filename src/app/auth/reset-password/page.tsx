@@ -1,17 +1,9 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import Link from "next/link"
-
-import { auth } from "@/lib/auth/auth"
-
 import { Gem } from "lucide-react"
-import { SignupForm } from "@/components/forms/signup-form"
 
-export default async function SignupPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+import ResetPasswordForm from "@/components/forms/reset-password-form"
 
-  if (session !== null) return redirect("/")
-
+export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -24,7 +16,8 @@ export default async function SignupPage() {
           </div>
           Personal Finance Assistant
         </Link>
-        <SignupForm />
+
+        <ResetPasswordForm />
       </div>
     </div>
   )

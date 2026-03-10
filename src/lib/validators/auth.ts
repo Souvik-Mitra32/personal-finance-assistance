@@ -16,3 +16,14 @@ export const signinSchema = z.object({
     .min(8, "Must be at least 8 characters long")
     .max(24, "Must be within 24 characters maximum"),
 })
+
+export const forgotPasswordSchema = z.object({
+  email: z.email({ error: "Email is required" }),
+})
+
+export const resetPasswordSchema = z.object({
+  password: z
+    .string("Password is required")
+    .min(8, "Must be at least 8 characters long")
+    .max(24, "Must be within 24 characters maximum"),
+})

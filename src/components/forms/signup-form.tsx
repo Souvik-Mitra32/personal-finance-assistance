@@ -1,7 +1,5 @@
 "use client"
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
@@ -29,8 +27,14 @@ import {
   FieldError,
 } from "@/components/ui/field"
 
-export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
-  const router = useRouter()
+export function SignupForm({
+  openLoginTab,
+  openEmailVerificationTab,
+  ...props
+}: {
+  openLoginTab: () => void
+  openEmailVerificationTab: (email: string) => void
+} & React.ComponentProps<typeof Card>) {
   const {
     control,
     handleSubmit,
@@ -47,18 +51,20 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   })
 
   async function onSubmit(data: z.infer<typeof signupSchema>) {
-    await authClient.signUp.email(
+    const res = await authClient.signUp.email(
       { ...data, callbackURL: "/" },
       {
         onError: (error) => {
           toast.error(error.error.message || "Failed to sign up")
         },
-        onSuccess: () => {
-          reset()
-          router.push("/")
-        },
       },
     )
+
+    if (res.error == null && !res.data.user.emailVerified) {
+      openEmailVerificationTab(data.email)
+    }
+
+    reset()
   }
 
   return (
@@ -157,7 +163,13 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
                 <FieldDescription className="px-6 text-center">
                   Already have an account?{" "}
-                  <Link href="/auth/login">Sign in</Link>
+                  <Button
+                    variant="link"
+                    className="p-0 text-sm underline-offset-4 hover:underline text-muted-foreground hover:text-accent-foreground cursor-pointer"
+                    onClick={openLoginTab}
+                  >
+                    Login
+                  </Button>
                 </FieldDescription>
               </Field>
             </FieldGroup>

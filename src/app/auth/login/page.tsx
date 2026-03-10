@@ -1,16 +1,35 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-import { auth } from "@/lib/auth/auth"
+import { authClient } from "@/lib/auth/auth-client"
 
 import { Gem } from "lucide-react"
 import { LoginForm } from "@/components/forms/login-form"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
+import { SignupForm } from "@/components/forms/signup-form"
+import { EmailVerification } from "@/components/cards/email-verification"
+import { ForgotPasswordForm } from "@/components/forms/forgot-password-form"
 
-export default async function LoginPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+type Tab = "logIn" | "signUp" | "emailVerification" | "forgotPassword"
 
-  if (session !== null) return redirect("/")
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [selectedTab, setSelectedTab] = useState<Tab>("logIn")
+
+  function openEmailVerificationTab(email: string) {
+    setEmail(email)
+    setSelectedTab("emailVerification")
+  }
+
+  useEffect(() => {
+    authClient.getSession().then((session) => {
+      if (session.data !== null) router.push("/")
+    })
+  }, [router])
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -24,7 +43,37 @@ export default async function LoginPage() {
           </div>
           Personal Finance Assistant
         </Link>
-        <LoginForm />
+
+        <Tabs
+          value={selectedTab}
+          onValueChange={(t) => setSelectedTab(t as Tab)}
+        >
+          <TabsContent value="logIn">
+            <LoginForm
+              openSignupTab={() => setSelectedTab("signUp")}
+              openEmailVerificationTab={openEmailVerificationTab}
+              openForgotPasswordTab={() => setSelectedTab("forgotPassword")}
+            />
+          </TabsContent>
+
+          <TabsContent value="signUp">
+            <SignupForm
+              openLoginTab={() => setSelectedTab("logIn")}
+              openEmailVerificationTab={openEmailVerificationTab}
+            />
+          </TabsContent>
+
+          <TabsContent value="emailVerification">
+            <EmailVerification
+              email={email}
+              openLoginTab={() => setSelectedTab("logIn")}
+            />
+          </TabsContent>
+
+          <TabsContent value="forgotPassword">
+            <ForgotPasswordForm openLoginTab={() => setSelectedTab("logIn")} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
