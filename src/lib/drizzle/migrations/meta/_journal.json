@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1773208903492,
+      "tag": "0000_petite_ink",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773210848625,
+      "tag": "0001_certain_queen_noir",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773222659889,
+      "tag": "0002_colorful_major_mapleleaf",
+      "breakpoints": true
+    }
+  ]
+}

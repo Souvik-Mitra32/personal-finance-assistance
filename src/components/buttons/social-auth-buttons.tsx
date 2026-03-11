@@ -1,7 +1,7 @@
 "use client"
 
 import { authClient } from "@/lib/auth/auth-client"
-import { BetterAuthActionButton } from "../better-auth-action-button"
+import { BetterAuthActionButton } from "./better-auth-action-button"
 import {
   SUPPORTED_OAUTH_PROVIDERS,
   SUPPORTED_OAUTH_PROVIDER_DETAILS,

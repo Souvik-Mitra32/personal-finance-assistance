@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 
 import { authClient } from "@/lib/auth/auth-client"
-import { BetterAuthActionButton } from "../better-auth-action-button"
+import { BetterAuthActionButton } from "../buttons/better-auth-action-button"
 import { DEFAULT_RESEND_EMAIL_TIMER } from "@/data/constants"
 import { Button } from "@/components/ui/button"
 import {

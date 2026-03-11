@@ -123,7 +123,7 @@ export function LoginForm({
                         className="p-0 ml-auto text-sm underline-offset-4 hover:underline cursor-pointer"
                         onClick={openForgotPasswordTab}
                       >
-                        Forgot your password?
+                        Forgot password?
                       </Button>
                     </div>
 

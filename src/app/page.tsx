@@ -1,37 +1,39 @@
-"use client"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 
-import { authClient } from "@/lib/auth/auth-client"
-import { BetterAuthActionButton } from "@/components/better-auth-action-button"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { auth } from "@/lib/auth/auth"
+import { getFinancialProfileByUserId } from "@/lib/queries/financial-profiles"
 
-export default function HomePage() {
-  const { data: session, isPending: isLoading } = authClient.useSession()
+import SignoutButton from "@/components/buttons/signout-button"
+import OnboardingForm from "@/components/forms/onboarding-form"
+import { formatCurrency } from "@/lib/formatters"
+import { convertPaisaToRupee } from "@/lib/utils"
 
-  if (isLoading) return <>Loading...</>
+export default async function HomePage() {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (session == null) return redirect("/auth/login")
+
+  const financialProfile = await getFinancialProfileByUserId(session.user.id)
+
+  if (financialProfile == null)
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          <OnboardingForm user={session.user} />
+        </div>
+      </div>
+    )
 
   return (
     <>
-      {session == null ? (
-        <>
-          <h1>Welcome to the landing page</h1>
-          <Button>
-            <Link href="/auth/login">Sign in</Link>
-          </Button>
-        </>
-      ) : (
-        <>
-          <h1>Hello {session.user.name}</h1>
-          <BetterAuthActionButton
-            variant="destructive"
-            action={async () => {
-              return authClient.signOut()
-            }}
-          >
-            Sign out
-          </BetterAuthActionButton>
-        </>
-      )}
+      <h1>
+        Hello {session.user.name}, your monthly expenses is INR{" "}
+        {formatCurrency(
+          convertPaisaToRupee(financialProfile.fixedMonthlyExpensesInPaisa),
+        )}
+      </h1>
+      <SignoutButton />
     </>
   )
 }
