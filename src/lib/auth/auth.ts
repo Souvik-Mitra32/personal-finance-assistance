@@ -25,6 +25,17 @@ export const auth = betterAuth({
       await sendVerificationEmail({ user, url })
     },
   },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      mapProfileToUser: (profile) => {
+        return {
+          // Any custom fields we want our user object to have
+        }
+      },
+    },
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
   }),

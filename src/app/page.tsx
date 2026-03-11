@@ -6,7 +6,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export default function HomePage() {
-  const { data: session } = authClient.useSession()
+  const { data: session, isPending: isLoading } = authClient.useSession()
+
+  if (isLoading) return <>Loading...</>
 
   return (
     <>
