@@ -1,6 +1,6 @@
 import { db } from "@/lib/drizzle/db"
 
-type FinancialProfile = {
+export type FinancialProfile = {
   id: string
   monthlyIncomeInPaisa: number
   fixedMonthlyExpensesInPaisa: number

@@ -6,8 +6,6 @@ import { getFinancialProfileByUserId } from "@/lib/queries/financial-profiles"
 
 import SignoutButton from "@/components/buttons/signout-button"
 import OnboardingForm from "@/components/forms/onboarding-form"
-import { formatCurrency } from "@/lib/formatters"
-import { convertPaisaToRupee } from "@/lib/utils"
 
 export default async function HomePage() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -27,12 +25,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1>
-        Hello {session.user.name}, your monthly expenses is INR{" "}
-        {formatCurrency(
-          convertPaisaToRupee(financialProfile.fixedMonthlyExpensesInPaisa),
-        )}
-      </h1>
+      <h1>Hello {session.user.name}</h1>
       <SignoutButton />
     </>
   )
