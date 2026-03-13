@@ -1,102 +1,97 @@
 "use client"
 
-import * as React from "react"
+import { ComponentProps, useEffect } from "react"
+import { usePathname } from "next/navigation"
 
+import {
+  ArrowDownUp,
+  BanknoteArrowDown,
+  Flag,
+  Gem,
+  LayoutDashboard,
+} from "lucide-react"
+import { NavUser } from "./nav-user"
+import { NavMain } from "./nav-main"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
-import { NavUser } from "./nav-user"
 
 const data = {
-  versions: [],
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
-      title: "Getting Started",
-      url: "#",
-      items: [
-        {
-          title: "Installation",
-          url: "#",
-        },
-        {
-          title: "Project Structure",
-          url: "#",
-        },
-      ],
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
     },
     {
-      title: "Dashbaord",
-      url: "/",
-      items: [
-        {
-          title: "Routing",
-          url: "#",
-        },
-        {
-          title: "Data Fetching",
-          url: "#",
-          isActive: true,
-        },
-      ],
+      title: "Goals",
+      url: "/goals",
+      icon: Flag,
     },
     {
-      title: "API Reference",
-      url: "#",
-      items: [
-        {
-          title: "Components",
-          url: "#",
-        },
-        {
-          title: "File Conventions",
-          url: "#",
-        },
-      ],
+      title: "Transactions",
+      url: "/transactions",
+      icon: ArrowDownUp,
+    },
+    {
+      title: "Expenses",
+      url: "/expenses",
+      icon: BanknoteArrowDown,
     },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  user,
+  ...props
+}: ComponentProps<typeof Sidebar> & {
+  user: {
+    name: string
+    email: string
+    avatar?: string | null
+  }
+}) {
+  const { setOpenMobile } = useSidebar()
+  const pathname = usePathname()
+
+  const items = data.navMain.map((item) => ({
+    ...item,
+    isActive: pathname === item.url,
+  }))
+
+  useEffect(() => {
+    setOpenMobile(false)
+  }, [setOpenMobile, pathname])
+
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>Personal Finance Assistant</SidebarHeader>
-      <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
-        {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {item.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
+    <Sidebar {...props} collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenuItem>
+          <SidebarMenuButton className="w-fit px-1.5">
+            <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+              <Gem className="size-3" />
+            </div>
+
+            <span className="truncate font-medium">Finance</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+
+        <NavMain items={items} />
+      </SidebarHeader>
+
+      <SidebarContent />
+
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   )

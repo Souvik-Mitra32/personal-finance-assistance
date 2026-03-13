@@ -6,6 +6,7 @@ export async function createOrLoadMonthlyCycle(
   profile: {
     monthlyIncomeInPaisa: number
     fixedMonthlyExpensesInPaisa: number
+    currentMonthSpendingInPaisa: number
     savingsRate: number
     cycleStartDay: number
   },
@@ -26,7 +27,7 @@ export async function createOrLoadMonthlyCycle(
 
   const previousCycle = await db.query.monthlyCycle.findFirst({
     where: (table, { eq }) => eq(table.userId, userId),
-    orderBy: (table, { desc }) => desc(table.createdAt),
+    orderBy: (table, { desc }) => desc(table.cycleStartDate),
   })
 
   const previousDeficit = previousCycle?.deficitCarryForwardInPaisa ?? 0
@@ -37,6 +38,19 @@ export async function createOrLoadMonthlyCycle(
     savingsRate: profile.savingsRate,
     previousDeficit,
   })
+
+  const currentMonthSpending = profile.currentMonthSpendingInPaisa
+
+  let monthSurplus = 0
+  let monthDeficit = 0
+  let deficitCarryForward = 0
+
+  if (currentMonthSpending <= numbers.spendingBudget) {
+    monthSurplus = numbers.spendingBudget - currentMonthSpending
+  } else {
+    monthDeficit = currentMonthSpending - numbers.spendingBudget
+    deficitCarryForward = monthDeficit
+  }
 
   const [cycle] = await db
     .insert(monthlyCycle)
@@ -56,14 +70,13 @@ export async function createOrLoadMonthlyCycle(
       goalAllocationInPaisa: numbers.goalAllocation,
 
       spendingBudgetInPaisa: numbers.spendingBudget,
+      variableSpendingInPaisa: currentMonthSpending,
 
-      variableSpendingInPaisa: 0,
-
-      monthSurplusInPaisa: 0,
-      monthDeficitInPaisa: 0,
+      monthSurplusInPaisa: monthSurplus,
+      monthDeficitInPaisa: monthDeficit,
 
       reserveUsedInPaisa: 0,
-      deficitCarryForwardInPaisa: 0,
+      deficitCarryForwardInPaisa: deficitCarryForward,
 
       status: "active",
     })

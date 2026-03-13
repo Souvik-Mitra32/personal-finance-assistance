@@ -1,17 +1,19 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 
 import { financialProfileSchema } from "@/lib/validators/financial-profile"
+import { createFinancialProfileAction } from "@/actions/financial-profiles"
 
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "../ui/spinner"
+import { NumberInput } from "../ui/number-input"
 import { Slider } from "../ui/slider"
+import SignoutButton from "../buttons/logout-button"
 import {
   Card,
   CardContent,
@@ -35,9 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import SignoutButton from "../buttons/signout-button"
-import { createFinancialProfileAction } from "@/actions/financial-profiles"
-import { NumberInput } from "../ui/number-input"
 
 const DEFAULT_SAVINGS_RATE = 30
 const DEFAULT_CYCLE_START_DAY = 5
@@ -127,7 +126,7 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
                     <FieldError errors={[fieldState.error]} />
                   ) : (
                     <FieldDescription>
-                      Total fixed expenses in a month that are non negotiable
+                      Fixed monthly expenses that are necessary
                     </FieldDescription>
                   )}
                 </Field>
@@ -144,14 +143,19 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
                     Cycle Start Day<span className="text-destructive">*</span>
                   </FieldLabel>
 
-                  <Select {...field} id={field.name} disabled={isSubmitting}>
-                    <SelectTrigger className="w-45">
+                  <Select
+                    name={field.name}
+                    value={field.value.toString()}
+                    onValueChange={field.onChange}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger id={field.name} className="w-45">
                       <SelectValue placeholder="Day" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
                         {Array.from({ length: 31 }).map((_, i) => (
-                          <SelectItem key={i} value={i + 1}>
+                          <SelectItem key={i} value={`${i + 1}`}>
                             {i + 1}
                           </SelectItem>
                         ))}
@@ -182,13 +186,13 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
                       <span className="text-destructive">*</span>
                     </FieldLabel>
                     <span className="text-sm text-muted-foreground">
-                      {field.value}
+                      {field.value}%
                     </span>
                   </div>
 
                   <Slider
-                    {...field}
-                    onValueChange={field.onChange}
+                    defaultValue={[DEFAULT_SAVINGS_RATE]}
+                    onChange={field.onChange}
                     max={100}
                     step={1}
                     disabled={isSubmitting}
@@ -229,7 +233,38 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
                     <FieldError errors={[fieldState.error]} />
                   ) : (
                     <FieldDescription>
-                      Current existing balance if any
+                      Current existing balance
+                    </FieldDescription>
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Current Spends */}
+            <Controller
+              control={control}
+              name="currentSpends"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>
+                    Current Spends (Optional)
+                  </FieldLabel>
+
+                  <NumberInput
+                    id={field.name}
+                    value={(field.value as number | null) ?? null}
+                    onChange={field.onChange}
+                    aria-invalid={fieldState.invalid}
+                    disabled={isSubmitting}
+                    placeholder="1000"
+                    autoComplete="off"
+                  />
+
+                  {fieldState.error ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : (
+                    <FieldDescription>
+                      Amount already spent this month
                     </FieldDescription>
                   )}
                 </Field>

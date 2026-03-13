@@ -27,3 +27,18 @@ export const resetPasswordSchema = z.object({
     .min(8, "Must be at least 8 characters long")
     .max(24, "Must be within 24 characters maximum"),
 })
+
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string("Required")
+    .min(8, "Must be at least 8 characters long")
+    .max(24, "Must be within 24 characters maximum"),
+  newPassword: z
+    .string("Required")
+    .min(8, "Must be at least 8 characters long")
+    .max(24, "Must be within 24 characters maximum"),
+  confirmPassword: z
+    .string("Required")
+    .min(8, "Must be at least 8 characters long")
+    .max(24, "Must be within 24 characters maximum"),
+})
