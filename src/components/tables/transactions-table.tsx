@@ -1,11 +1,17 @@
+import { format } from "date-fns"
+
 import { Transaction } from "@/lib/drizzle/schema"
+
+import { cn } from "@/lib/utils"
+import { formatCurrencyFromPaisa } from "@/lib/formatters"
 
 import { MoreHorizontalIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import EditTransactionDropdownMenuItem from "../dropdown-menu-items/edit-transaction-dropdown-menu-item"
+import DeleteTransactionDropdownMenuItem from "../dropdown-menu-items/delete-transaction-dropdown-menu-item"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -17,12 +23,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { cn, convertPaisaToRupees } from "@/lib/utils"
-import { formatCurrency, formatDate } from "@/lib/formatters"
 
 export default function TransactionsTable({
+  financialProfileId,
+  cycleStartDay,
   transactions,
 }: {
+  financialProfileId: string
+  cycleStartDay: number
   transactions: Transaction[]
 }) {
   return (
@@ -51,9 +59,9 @@ export default function TransactionsTable({
                 )}
               >
                 {tx.type === "debit" ? "-" : "+"}
-                {formatCurrency(convertPaisaToRupees(tx.amountInPaisa))}
+                {formatCurrencyFromPaisa(tx.amountInPaisa)}
               </TableCell>
-              <TableCell>{formatDate(tx.date.toLocaleDateString())}</TableCell>
+              <TableCell>{format(tx.date, "MMM dd, yyyy")}</TableCell>
               <TableCell>{`${`${tx.category.slice(0, 1).toUpperCase()}${tx.category.slice(1)}`.replace("_", " ")}`}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
@@ -64,12 +72,13 @@ export default function TransactionsTable({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                    <EditTransactionDropdownMenuItem
+                      financialProfileId={financialProfileId}
+                      cycleStartDay={cycleStartDay}
+                      defaultValues={tx}
+                    />
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      Delete
-                    </DropdownMenuItem>
+                    <DeleteTransactionDropdownMenuItem />
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

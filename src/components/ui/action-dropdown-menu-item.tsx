@@ -1,8 +1,8 @@
 "use client"
 
 import { type ComponentProps, type ReactNode, useTransition } from "react"
-import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { DropdownMenuItem } from "./dropdown-menu"
 import { LoadingSwap } from "@/components/ui/loading-swap"
 import {
   AlertDialog,
@@ -16,12 +16,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export function ActionButton({
+export function ActionDropdownMenuItem({
   action,
   requireAreYouSure = false,
   areYouSureDescription = "This action cannot be undone.",
   ...props
-}: ComponentProps<typeof Button> & {
+}: ComponentProps<typeof DropdownMenuItem> & {
   action: () => Promise<{ error: boolean; message?: string }>
   requireAreYouSure?: boolean
   areYouSureDescription?: ReactNode
@@ -39,7 +39,7 @@ export function ActionButton({
     return (
       <AlertDialog open={isLoading ? true : undefined}>
         <AlertDialogTrigger asChild>
-          <Button {...props} />
+          <DropdownMenuItem {...props} />
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -60,12 +60,13 @@ export function ActionButton({
   }
 
   return (
-    <Button
+    <DropdownMenuItem
       {...props}
       disabled={props.disabled ?? isLoading}
-      onClick={(e) => {
+      onSelect={(e) => {
+        e.preventDefault()
         performAction()
-        props.onClick?.(e)
+        props.onSelect?.(e)
       }}
     >
       <LoadingSwap
@@ -74,6 +75,6 @@ export function ActionButton({
       >
         {props.children}
       </LoadingSwap>
-    </Button>
+    </DropdownMenuItem>
   )
 }

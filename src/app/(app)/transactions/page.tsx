@@ -5,9 +5,8 @@ import { getFinancialProfileByUserId } from "@/lib/queries/financial-profiles"
 import { getTransactionsByFinancialProfileId } from "@/lib/queries/transactions"
 
 import { Card, CardContent } from "@/components/ui/card"
-import FilterTransactionsDialog from "@/components/dialogs/filter-transactions-dialog"
 import TransactionsTable from "@/components/tables/transactions-table"
-import TransactionFormDialog from "@/components/dialogs/transaction-form-dialog"
+import AddTransactionButton from "@/components/buttons/add-transaction-button"
 
 export default async function TransactionsPage() {
   const user = await getCurrentUser()
@@ -28,8 +27,9 @@ export default async function TransactionsPage() {
           </div>
 
           <div className="flex gap-3 justify-end">
-            {/* <FilterTransactionsDialog /> */}
-            <TransactionFormDialog
+            {/* TODO: Add filter button */}
+
+            <AddTransactionButton
               financialProfileId={financialProfile.id}
               cycleStartDay={financialProfile.cycleStartDay}
             />
@@ -38,7 +38,11 @@ export default async function TransactionsPage() {
 
         <Card>
           <CardContent>
-            <TransactionsTable transactions={transactions} />
+            <TransactionsTable
+              transactions={transactions}
+              financialProfileId={financialProfile.id}
+              cycleStartDay={financialProfile.cycleStartDay}
+            />
           </CardContent>
         </Card>
       </section>

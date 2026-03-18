@@ -19,28 +19,3 @@ const NUMBER_FORMATTER = new Intl.NumberFormat("en-IN")
 export function formatNumber(number: number) {
   return NUMBER_FORMATTER.format(number)
 }
-
-type DateFormatOptions = {
-  locale?: string
-  options?: Intl.DateTimeFormatOptions
-}
-
-export function formatDate(
-  date: Date | string | number,
-  config?: DateFormatOptions,
-) {
-  const d = new Date(date)
-
-  if (isNaN(d.getTime())) return ""
-
-  const formatter = new Intl.DateTimeFormat(
-    config?.locale || "en-IN",
-    config?.options || {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    },
-  )
-
-  return formatter.format(d)
-}
