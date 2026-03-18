@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 
 import { financialProfileSchema } from "@/lib/validators/financial-profile"
-import { createFinancialProfileAction } from "@/actions/financial-profiles"
+import { createFinancialProfileAction } from "@/lib/actions/financial-profiles"
 
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -45,7 +45,6 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
   const {
     control,
     handleSubmit,
-    trigger,
     watch,
     reset,
     formState: { isSubmitting },
@@ -58,13 +57,12 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
   })
 
   async function onSubmit(data: z.infer<typeof financialProfileSchema>) {
-    const error = await createFinancialProfileAction(user.id, data)
-    if (error) toast.error(error || "Something went wrong")
-  }
+    const res = await createFinancialProfileAction(user.id, data, {
+      redirectOnSuccess: true,
+    })
 
-  useEffect(() => {
-    reset()
-  }, [])
+    if (!res.success) toast.error(res.error || "Something went wrong")
+  }
 
   return (
     <Card>
@@ -88,6 +86,7 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
 
                   <NumberInput
                     id={field.name}
+                    min={0}
                     value={(field.value as number | null) ?? null}
                     onChange={field.onChange}
                     aria-invalid={fieldState.invalid}
@@ -114,6 +113,7 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
 
                   <NumberInput
                     id={field.name}
+                    min={0}
                     value={(field.value as number | null) ?? null}
                     onChange={field.onChange}
                     aria-invalid={fieldState.invalid}
@@ -145,8 +145,8 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
 
                   <Select
                     name={field.name}
-                    value={field.value.toString()}
-                    onValueChange={field.onChange}
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger id={field.name} className="w-45">
@@ -186,12 +186,12 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
                       <span className="text-destructive">*</span>
                     </FieldLabel>
                     <span className="text-sm text-muted-foreground">
-                      {field.value}%
+                      {field.value?.toString() || DEFAULT_SAVINGS_RATE}%
                     </span>
                   </div>
 
                   <Slider
-                    defaultValue={[DEFAULT_SAVINGS_RATE]}
+                    defaultValue={[Number(DEFAULT_SAVINGS_RATE)]}
                     onChange={field.onChange}
                     max={100}
                     step={1}
@@ -221,6 +221,7 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
 
                   <NumberInput
                     id={field.name}
+                    min={0}
                     value={(field.value as number | null) ?? null}
                     onChange={field.onChange}
                     aria-invalid={fieldState.invalid}
@@ -252,6 +253,7 @@ export default function OnboardingForm({ user }: { user: { id: string } }) {
 
                   <NumberInput
                     id={field.name}
+                    min={0}
                     value={(field.value as number | null) ?? null}
                     onChange={field.onChange}
                     aria-invalid={fieldState.invalid}
