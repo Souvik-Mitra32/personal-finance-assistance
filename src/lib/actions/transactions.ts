@@ -5,7 +5,10 @@ import { refresh } from "next/cache"
 import { db } from "../drizzle/db"
 import { transaction } from "../drizzle/schema"
 import { createTransactionSchema } from "../validators/transaction"
-import { getOrCreateMonthlyCycle } from "../finance/monthly-cycle"
+import {
+  getMonthlyCycleById,
+  getOrCreateMonthlyCycle,
+} from "../finance/monthly-cycle"
 
 import { convertRupeesToPaisa, normalizeDate } from "../utils"
 import { eq } from "drizzle-orm"
@@ -29,7 +32,6 @@ export async function addTransactionAction(
 
   const data = result.data
 
-  // IMPORTANT: use date-driven cycle resolution
   const cycle = await getOrCreateMonthlyCycle(financialProfileId, data.date)
 
   if (!cycle) return { success: false, error: "Monthly cycle not found" }
@@ -40,7 +42,7 @@ export async function addTransactionAction(
       error: "Monthly cycle is not active",
     }
 
-  // Normalize dates (prevent timezone bugs)
+  const today = normalizeDate(new Date())
   const txDate = normalizeDate(data.date)
   const start = normalizeDate(cycle.cycleStartDate)
   const end = normalizeDate(cycle.cycleEndDate)
@@ -51,7 +53,7 @@ export async function addTransactionAction(
       error: "Transaction date is out of bounds",
     }
 
-  if (txDate > new Date())
+  if (txDate > today)
     return {
       success: false,
       error: "Future transactions not allowed",
@@ -100,44 +102,45 @@ export async function editTransactionAction(
 
   const data = result.data
 
-  // Fetch transaction to get financialProfileId for cycle resolution
   const existingTx = await db.query.transaction.findFirst({
     where: (tx, { eq }) => eq(tx.id, transactionId),
-    columns: { financialProfileId: true, date: true },
   })
 
   if (!existingTx) return { success: false, error: "Transaction not found" }
 
-  // IMPORTANT: use date-driven cycle resolution
-  const cycle = await getOrCreateMonthlyCycle(
+  const oldCycle = await getMonthlyCycleById(existingTx.cycleId)
+
+  if (!oldCycle || oldCycle.status !== "active") {
+    return { success: false, error: "Cannot edit closed cycle" }
+  }
+
+  const newCycle = await getOrCreateMonthlyCycle(
     existingTx.financialProfileId,
     data.date,
   )
 
-  if (!cycle) return { success: false, error: "Monthly cycle not found" }
+  if (!newCycle || newCycle.status !== "active") {
+    return { success: false, error: "Target cycle not active" }
+  }
 
-  if (cycle.status !== "active")
-    return {
-      success: false,
-      error: "Monthly cycle is not active",
-    }
-
-  // Normalize dates (prevent timezone bugs)
   const txDate = normalizeDate(data.date)
-  const start = normalizeDate(cycle.cycleStartDate)
-  const end = normalizeDate(cycle.cycleEndDate)
+  const start = normalizeDate(newCycle.cycleStartDate)
+  const end = normalizeDate(newCycle.cycleEndDate)
+  const today = normalizeDate(new Date())
 
-  if (txDate < start || txDate > end)
+  if (txDate < start || txDate > end) {
     return {
       success: false,
       error: "Transaction date is out of bounds",
     }
+  }
 
-  if (txDate > new Date())
+  if (txDate > today) {
     return {
       success: false,
       error: "Future transactions not allowed",
     }
+  }
 
   const { amount, ...rest } = data
   const amountInPaisa = convertRupeesToPaisa(amount)
@@ -147,15 +150,51 @@ export async function editTransactionAction(
       .update(transaction)
       .set({
         ...rest,
-        financialProfileId: existingTx.financialProfileId,
-        cycleId: cycle.id,
         amountInPaisa,
+        cycleId: newCycle.id,
       })
       .where(eq(transaction.id, transactionId))
       .returning({ id: transaction.id })
 
     if (!rows || rows.length === 0) {
       throw new Error("Failed to update transaction")
+    }
+  })
+
+  if (options?.redirectOnSuccess !== false) refresh()
+
+  return { success: true, error: null }
+}
+
+export async function deleteTransactionAction(
+  transactionId: string,
+  options?: { redirectOnSuccess?: boolean },
+) {
+  const existingTx = await db.query.transaction.findFirst({
+    where: (tx, { eq }) => eq(tx.id, transactionId),
+  })
+
+  if (!existingTx) {
+    return { success: false, error: "Transaction not found" }
+  }
+
+  const cycle = await getMonthlyCycleById(existingTx.cycleId)
+
+  if (!cycle || cycle.status !== "active") {
+    return {
+      success: false,
+      error: "Cannot delete transaction from closed cycle",
+    }
+  }
+
+  await db.transaction(async (tx) => {
+    const result = await tx
+      .delete(transaction)
+      .where(eq(transaction.id, transactionId))
+      .returning({ id: transaction.id })
+
+    if (!result || result.length === 0) {
+      throw new Error("Failed to delete transaction")
     }
   })
 

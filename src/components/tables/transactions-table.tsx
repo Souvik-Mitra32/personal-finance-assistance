@@ -78,7 +78,7 @@ export default function TransactionsTable({
                       defaultValues={tx}
                     />
                     <DropdownMenuSeparator />
-                    <DeleteTransactionDropdownMenuItem />
+                    <DeleteTransactionDropdownMenuItem transactionId={tx.id} />
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
