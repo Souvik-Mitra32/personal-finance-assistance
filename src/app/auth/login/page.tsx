@@ -10,7 +10,7 @@ import { Gem } from "lucide-react"
 import { LoginForm } from "@/components/forms/login-form"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { SignupForm } from "@/components/forms/signup-form"
-import { EmailVerification } from "@/components/cards/email-verification"
+import { EmailVerification } from "@/components/cards/email-verification-card"
 import { ForgotPasswordForm } from "@/components/forms/forgot-password-form"
 
 type Tab = "logIn" | "signUp" | "emailVerification" | "forgotPassword"

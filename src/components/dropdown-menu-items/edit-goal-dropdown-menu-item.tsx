@@ -2,29 +2,19 @@
 
 import { useState } from "react"
 
-import { Transaction } from "@/lib/drizzle/schema"
+import { Goal } from "@/lib/drizzle/schema"
 
 import { DropdownMenuItem } from "../ui/dropdown-menu"
 import AppDialog from "@/components/app-dialog"
-import TransactionForm from "@/components/forms/transaction-form"
+import GoalForm from "../forms/goal-form"
 
-export default function EditTransactionDropdownMenuItem({
-  financialProfileId,
-  cycleStartDay,
-  defaultValues,
+export default function EditGoalDropdownMenuItem({
+  goal,
   onClose,
 }: {
-  financialProfileId: string
-  cycleStartDay: number
-  defaultValues: Pick<
-    Transaction,
-    | "id"
-    | "description"
-    | "amountInPaisa"
-    | "date"
-    | "type"
-    | "category"
-    | "note"
+  goal: Pick<
+    Goal,
+    "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status"
   >
   onClose?: () => void
 }) {
@@ -37,7 +27,7 @@ export default function EditTransactionDropdownMenuItem({
 
   return (
     <AppDialog
-      title="Edit Transaction"
+      title="Edit Goal"
       open={dialogOpen}
       onOpenChange={(open) => {
         if (!open) {
@@ -57,10 +47,8 @@ export default function EditTransactionDropdownMenuItem({
       }
     >
       {({ close }) => (
-        <TransactionForm
-          financialProfileId={financialProfileId}
-          cycleStartDay={cycleStartDay}
-          defaultValues={defaultValues}
+        <GoalForm
+          defaultValues={goal}
           onSuccess={() => {
             close()
             onClose?.()

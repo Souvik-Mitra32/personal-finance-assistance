@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import TransactionDropdownMenu from "../dropdown-menus/transaction-dropdown-menu"
 
 export default function TransactionsTable({
   financialProfileId,
@@ -64,23 +65,11 @@ export default function TransactionsTable({
               <TableCell>{format(tx.date, "MMM dd, yyyy")}</TableCell>
               <TableCell>{`${`${tx.category.slice(0, 1).toUpperCase()}${tx.category.slice(1)}`.replace("_", " ")}`}</TableCell>
               <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-8">
-                      <MoreHorizontalIcon />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <EditTransactionDropdownMenuItem
-                      financialProfileId={financialProfileId}
-                      cycleStartDay={cycleStartDay}
-                      defaultValues={tx}
-                    />
-                    <DropdownMenuSeparator />
-                    <DeleteTransactionDropdownMenuItem transactionId={tx.id} />
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <TransactionDropdownMenu
+                  financialProfileId={financialProfileId}
+                  cycleStartDay={cycleStartDay}
+                  transaction={tx}
+                />
               </TableCell>
             </TableRow>
           ))}

@@ -20,7 +20,24 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    // Must have
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnusedLabels": false,
+    "noUncheckedSideEffectImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+
+    // Optional but highly recommended
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "erasableSyntaxOnly": true,
+
+    // Personal preference
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": false // recommended true
   },
   "include": [
     "next-env.d.ts",

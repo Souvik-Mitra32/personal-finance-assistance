@@ -1,0 +1,1 @@
+ALTER TABLE "goal" ALTER COLUMN "target_date" SET NOT NULL;

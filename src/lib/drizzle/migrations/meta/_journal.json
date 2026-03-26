@@ -50,6 +50,20 @@
       "when": 1773752968021,
       "tag": "0006_dark_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774404630875,
+      "tag": "0007_perfect_wrecker",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774413258602,
+      "tag": "0008_yellow_iron_monger",
+      "breakpoints": true
     }
   ]
 }

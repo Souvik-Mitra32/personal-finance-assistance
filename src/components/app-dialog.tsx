@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, ReactNode } from "react"
+import { ReactNode } from "react"
 
 import {
   Dialog,
@@ -13,18 +13,20 @@ import {
 type AppDialogProps = {
   title: string
   trigger: ReactNode
+  open: boolean
+  onOpenChange: (isOpen: boolean) => void
   children: (ctx: { close: () => void }) => ReactNode
 }
 
 export default function AppDialog({
   title,
   trigger,
+  open,
+  onOpenChange,
   children,
 }: AppDialogProps) {
-  const [open, setOpen] = useState(false)
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent className="sm:max-w-sm">
@@ -32,7 +34,7 @@ export default function AppDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        {children({ close: () => setOpen(false) })}
+        {children({ close: () => onOpenChange(false) })}
       </DialogContent>
     </Dialog>
   )

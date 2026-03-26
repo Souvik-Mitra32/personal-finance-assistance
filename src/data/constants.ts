@@ -1,5 +1,10 @@
 export const DEFAULT_RESEND_EMAIL_TIMER = 30 // in seconds
 
+// Default to tomorrow
+export const DEFAULT_GOAL_TARGET_DATE = new Date(
+  Date.now() + 24 * 60 * 60 * 1000,
+)
+
 export const DEBIT_TRANSACTION_CATEGORIES = [
   "food",
   "groceries",

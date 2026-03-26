@@ -129,19 +129,6 @@ export async function closeMonthlyCycle(cycleId: string) {
   return true
 }
 
-export async function getCurrentMonthlyCycle(
-  financialProfileId: string,
-  cycleMonth: string,
-) {
-  return db.query.monthlyCycle.findFirst({
-    where: (table, { and, eq }) =>
-      and(
-        eq(table.financialProfileId, financialProfileId),
-        eq(table.cycleMonth, cycleMonth),
-      ),
-  })
-}
-
 export async function getMonthlyCycleById(cycleId: string) {
   return db.query.monthlyCycle.findFirst({
     where: (table, { eq }) => eq(table.id, cycleId),

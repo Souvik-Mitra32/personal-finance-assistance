@@ -2,30 +2,21 @@
 
 import { useState } from "react"
 
-import { Transaction } from "@/lib/drizzle/schema"
+import { Goal } from "@/lib/drizzle/schema"
 
 import { DropdownMenuItem } from "../ui/dropdown-menu"
 import AppDialog from "@/components/app-dialog"
-import TransactionForm from "@/components/forms/transaction-form"
+import GoalContributionForm from "../forms/goal-contribution-form"
 
-export default function EditTransactionDropdownMenuItem({
-  financialProfileId,
-  cycleStartDay,
-  defaultValues,
+export default function ContributeDropdownMenuItem({
+  goal,
+  goalAllocationInPaisa,
+  totalContributionInPaisa,
   onClose,
 }: {
-  financialProfileId: string
-  cycleStartDay: number
-  defaultValues: Pick<
-    Transaction,
-    | "id"
-    | "description"
-    | "amountInPaisa"
-    | "date"
-    | "type"
-    | "category"
-    | "note"
-  >
+  goal: Pick<Goal, "id" | "name" | "targetAmountInPaisa" | "status">
+  goalAllocationInPaisa: number
+  totalContributionInPaisa: number
   onClose?: () => void
 }) {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -37,7 +28,7 @@ export default function EditTransactionDropdownMenuItem({
 
   return (
     <AppDialog
-      title="Edit Transaction"
+      title={`${goal.name} Contribution`}
       open={dialogOpen}
       onOpenChange={(open) => {
         if (!open) {
@@ -51,16 +42,17 @@ export default function EditTransactionDropdownMenuItem({
             e.preventDefault()
             setDialogOpen(true)
           }}
+          disabled={goal.status !== "active"}
         >
-          Edit
+          Contribute
         </DropdownMenuItem>
       }
     >
       {({ close }) => (
-        <TransactionForm
-          financialProfileId={financialProfileId}
-          cycleStartDay={cycleStartDay}
-          defaultValues={defaultValues}
+        <GoalContributionForm
+          goal={goal}
+          goalAllocationInPaisa={goalAllocationInPaisa}
+          totalContributionInPaisa={totalContributionInPaisa}
           onSuccess={() => {
             close()
             onClose?.()

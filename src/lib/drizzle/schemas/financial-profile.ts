@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm"
 import { pgTable, text, timestamp, index, integer } from "drizzle-orm/pg-core"
 import { user } from "./auth"
 import { monthlyCycle } from "./monthly-cycle"
+import { goal } from "./goal"
 
 export const financialProfile = pgTable(
   "financial_profile",
@@ -45,5 +46,6 @@ export const financialProfileRelations = relations(
       references: [user.id],
     }),
     monthlyCycles: many(monthlyCycle),
+    goals: many(goal),
   }),
 )

@@ -5,20 +5,14 @@ import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "../ui/button"
 import AppDialog from "@/components/app-dialog"
-import TransactionForm from "@/components/forms/transaction-form"
+import GoalForm from "../forms/goal-form"
 
-export default function AddTransactionButton({
-  financialProfileId,
-  cycleStartDay,
-}: {
-  financialProfileId: string
-  cycleStartDay: number
-}) {
+export default function AddGoalButton() {
   const [dialogOpen, setDialogOpen] = useState(false)
 
   return (
     <AppDialog
-      title="Add Transaction"
+      title="Add Goal"
       open={dialogOpen}
       onOpenChange={(open) => {
         if (!open) {
@@ -29,14 +23,12 @@ export default function AddTransactionButton({
       trigger={
         <Button>
           <Plus />
-          Add Transaction
+          Add Goal
         </Button>
       }
     >
       {({ close }) => (
-        <TransactionForm
-          financialProfileId={financialProfileId}
-          cycleStartDay={cycleStartDay}
+        <GoalForm
           onSuccess={() => {
             close()
             setDialogOpen(false)

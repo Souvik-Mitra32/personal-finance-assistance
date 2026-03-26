@@ -103,7 +103,11 @@ export default async function DashboardPage() {
               </CardAction>
             </CardHeader>
             <CardContent>
-              <TransactionsTable transactions={transactions.slice(0, 5)} />
+              <TransactionsTable
+                transactions={transactions.slice(0, 5)}
+                financialProfileId={financialProfile.id}
+                cycleStartDay={financialProfile.cycleStartDay}
+              />
             </CardContent>
           </Card>
         </div>
