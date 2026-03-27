@@ -64,6 +64,27 @@
       "when": 1774413258602,
       "tag": "0008_yellow_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774542854531,
+      "tag": "0009_omniscient_payback",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774543500385,
+      "tag": "0010_damp_karnak",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774543735295,
+      "tag": "0011_peaceful_nuke",
+      "breakpoints": true
     }
   ]
 }

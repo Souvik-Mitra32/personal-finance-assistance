@@ -13,3 +13,11 @@ export async function getGoalById(goalId: string) {
 
   return res ?? null
 }
+
+export async function getGoalBySlug(slug: string) {
+  const res = await db.query.goal.findFirst({
+    where: (g, { eq }) => eq(g.slug, slug),
+  })
+
+  return res ?? null
+}

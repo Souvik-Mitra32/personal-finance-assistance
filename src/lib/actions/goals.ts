@@ -9,7 +9,7 @@ import { goalSchema } from "../validators/goal"
 import { getCurrentUser } from "../queries/auth"
 import { getFinancialProfileByUserId } from "../queries/financial-profiles"
 
-import { convertRupeesToPaisa } from "../utils"
+import { convertRupeesToPaisa, createSlug } from "../utils"
 
 export async function createGoalAction(
   unsafeData: unknown,
@@ -30,7 +30,7 @@ export async function createGoalAction(
     }
   }
 
-  const { targetAmount, ...rest } = result.data
+  const { targetAmount, name, ...rest } = result.data
 
   const targetAmountInPaisa = convertRupeesToPaisa(targetAmount)
   // TODO: Validate targetDate is in the future
@@ -39,6 +39,8 @@ export async function createGoalAction(
     .values({
       financialProfileId: financialProfile.id,
       targetAmountInPaisa,
+      name,
+      slug: createSlug(name),
       ...rest,
     })
     .returning({ id: goal.id })

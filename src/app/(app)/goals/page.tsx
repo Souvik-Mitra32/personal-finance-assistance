@@ -7,6 +7,8 @@ import { getOrCreateMonthlyCycle } from "@/lib/finance/monthly-cycle"
 
 import GoalCard from "@/components/cards/goal-card"
 import AddGoalButton from "@/components/buttons/add-goal-button"
+import { getContributionsByGoalId } from "@/lib/queries/goal-contributions"
+import { Goal } from "@/lib/drizzle/schema"
 
 export default async function GoalsPage() {
   const user = await getCurrentUser()
@@ -35,7 +37,7 @@ export default async function GoalsPage() {
         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-4">
           {/* TODO: Add empty state */}
           {goals.map((goal) => (
-            <GoalCard
+            <GoalCardWrapper
               key={goal.id}
               goal={goal}
               goalAllocationInPaisa={cycle.goalAllocationInPaisa}
@@ -44,5 +46,23 @@ export default async function GoalsPage() {
         </div>
       </section>
     </main>
+  )
+}
+
+async function GoalCardWrapper({
+  goalAllocationInPaisa,
+  goal,
+}: {
+  goalAllocationInPaisa: number
+  goal: Goal
+}) {
+  const contributions = await getContributionsByGoalId(goal.id)
+
+  return (
+    <GoalCard
+      goal={goal}
+      goalAllocationInPaisa={goalAllocationInPaisa}
+      contributions={contributions}
+    />
   )
 }

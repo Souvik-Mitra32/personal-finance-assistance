@@ -1,19 +1,18 @@
+"use client"
+
+import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 
 import { Goal, GoalContribution } from "@/lib/drizzle/schema"
-import { getContributionsByGoalId } from "@/lib/queries/goal-contributions"
-
 import { formatCurrencyFromPaisa } from "@/lib/formatters"
 
-import EditGoalDropdownMenuItem from "../dropdown-menu-items/edit-goal-dropdown-menu-item"
-import ContributeDropdownMenuItem from "../dropdown-menu-items/contribute-dropdown-menu-item"
-import { BellRing, MoreVertical } from "lucide-react"
+import { BellRing } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "../ui/separator"
 import { Label } from "../ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "../ui/button"
+import GoalDropdownMenu from "../dropdown-menus/goal-dropdown-menu"
 import {
   Card,
   CardAction,
@@ -22,25 +21,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import GoalDropdownMenu from "../dropdown-menus/goal-dropdown-menu"
 
-export default async function GoalCard({
+export default function GoalCard({
   goalAllocationInPaisa,
   goal,
+  contributions,
 }: {
   goalAllocationInPaisa: number
   goal: Pick<
     Goal,
-    "id" | "name" | "status" | "targetAmountInPaisa" | "targetDate"
+    "id" | "name" | "status" | "targetAmountInPaisa" | "targetDate" | "slug"
   >
+  contributions: GoalContribution[]
 }) {
-  const contributions = await getContributionsByGoalId(goal.id)
+  const router = useRouter()
   const goalProgressData = getGoalProgressData(
     goal.targetAmountInPaisa,
     contributions,
@@ -56,7 +50,10 @@ export default async function GoalCard({
           : ("default" as const)
 
   return (
-    <Card>
+    <Card
+      onClick={() => router.push(`/goals/${goal.slug}`)}
+      className="cursor-pointer"
+    >
       <CardHeader>
         <div className="flex items-center space-x-2">
           <CardTitle>{goal.name}</CardTitle>
