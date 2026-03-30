@@ -2,13 +2,16 @@
 
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { format } from "date-fns"
+import { format, isPast } from "date-fns"
 import z from "zod"
 
 import { Goal } from "@/lib/drizzle/schema"
 import { goalSchema } from "@/lib/validators/goal"
+import { createGoalAction, editGoalAction } from "@/lib/actions/goals"
+
 import { DEFAULT_GOAL_TARGET_DATE } from "@/data/constants"
-import { createGoalAction } from "@/lib/actions/goals"
+import { convertPaisaToRupees } from "@/lib/utils"
+import { fromDatabase, normalizeDate, toDatabase } from "@/lib/utils/date"
 
 import { toast } from "sonner"
 import { ChevronDownIcon } from "lucide-react"
@@ -34,20 +37,30 @@ import {
 const STATUS_OPTIONS = [
   { value: "active", label: "Active" },
   { value: "paused", label: "Paused" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
 ] as const
 
 export default function GoalForm({
   defaultValues,
+  totalContributionInPaisa,
   onSuccess,
 }: {
   defaultValues?: Pick<
     Goal,
     "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status"
   >
+  totalContributionInPaisa?: number
   onSuccess: () => void
 }) {
+  function getInitialDate() {
+    if (defaultValues?.targetDate) {
+      if (defaultValues.targetDate instanceof Date) {
+        return fromDatabase(defaultValues.targetDate)
+      }
+      return new Date(defaultValues.targetDate)
+    }
+    return fromDatabase(new Date(DEFAULT_GOAL_TARGET_DATE))
+  }
+
   const {
     control,
     handleSubmit,
@@ -61,18 +74,32 @@ export default function GoalForm({
       targetAmount: defaultValues
         ? defaultValues.targetAmountInPaisa / 100
         : null,
-      targetDate: defaultValues
-        ? defaultValues.targetDate && new Date(defaultValues.targetDate)
-        : DEFAULT_GOAL_TARGET_DATE,
+      targetDate: getInitialDate(),
       status: defaultValues?.status ?? "active",
     },
   })
 
+  const isStatusEditable = getIsStatusEditable(
+    defaultValues,
+    totalContributionInPaisa,
+  )
+  const minimumTargetAmount = convertPaisaToRupees(
+    totalContributionInPaisa ?? 0,
+  )
+
   async function onSubmit(data: z.infer<typeof goalSchema>) {
-    const res = await createGoalAction(data, { redirectOnSuccess: false })
+    const submitData = { ...data, targetDate: toDatabase(data.targetDate) }
+    const action = defaultValues
+      ? editGoalAction(defaultValues.id, submitData, {
+          redirectOnSuccess: false,
+        })
+      : createGoalAction(submitData, { redirectOnSuccess: false })
+    const res = await action
 
     if (!res.success) {
-      toast.error(res.error || "Failed to create goal")
+      toast.error(
+        res.error || `Failed to ${defaultValues ? "edit" : "create"} goal`,
+      )
       return
     }
 
@@ -122,7 +149,7 @@ export default function GoalForm({
 
                 <NumberInput
                   id={field.name}
-                  min={0}
+                  min={minimumTargetAmount}
                   value={(field.value as number | null) ?? null}
                   onChange={field.onChange}
                   aria-invalid={fieldState.invalid}
@@ -172,15 +199,21 @@ export default function GoalForm({
                       selected={
                         field.value instanceof Date ? field.value : undefined
                       }
-                      onSelect={(d) => {
-                        if (d) {
-                          field.onChange(d)
+                      onSelect={(date) => {
+                        if (date) {
+                          const localDate = normalizeDate(date)
+                          field.onChange(localDate)
                         }
                       }}
                       defaultMonth={
                         field.value instanceof Date ? field.value : undefined
                       }
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        const compareDate = normalizeDate(date)
+                        return compareDate < today
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
@@ -215,11 +248,7 @@ export default function GoalForm({
                     <RadioGroupItem
                       value={option.value}
                       id={option.value}
-                      disabled={
-                        option.value !== "active" &&
-                        option.value !== "paused" &&
-                        !defaultValues
-                      }
+                      disabled={!isStatusEditable}
                     />
                     <Label htmlFor={option.value}>{option.label}</Label>
                   </div>
@@ -253,4 +282,21 @@ export default function GoalForm({
       </FieldGroup>
     </form>
   )
+}
+
+function getIsStatusEditable(
+  goal: Pick<Goal, "targetAmountInPaisa" | "targetDate"> | undefined,
+  saved: number | undefined,
+) {
+  if (!goal || !saved) return true
+
+  // Convert database date to local for comparison
+  const targetDate =
+    goal.targetDate instanceof Date
+      ? fromDatabase(goal.targetDate)
+      : new Date(goal.targetDate)
+
+  if (isPast(targetDate)) return false
+  if (saved >= goal.targetAmountInPaisa) return false
+  return true
 }

@@ -11,12 +11,7 @@ import { relations } from "drizzle-orm"
 import { financialProfile } from "./financial-profile"
 import { goalContribution } from "./goal-contribution"
 
-export const GOAL_STATUSES = [
-  "active",
-  "completed",
-  "paused",
-  "cancelled",
-] as const
+export const GOAL_STATUSES = ["active", "paused"] as const
 
 const goalStatusEnum = pgEnum("goal_status", GOAL_STATUSES)
 

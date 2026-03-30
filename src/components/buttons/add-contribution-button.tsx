@@ -1,53 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { ComponentProps, useState } from "react"
 
 import { Goal } from "@/lib/drizzle/schema"
 
-import { DropdownMenuItem } from "../ui/dropdown-menu"
+import { Plus } from "lucide-react"
+import { Button } from "../ui/button"
 import AppDialog from "@/components/app-dialog"
 import GoalContributionForm from "../forms/goal-contribution-form"
 
-export default function ContributeDropdownMenuItem({
-  isContributable,
+export default function AddContributionButton({
   goal,
   goalAllocationInPaisa,
   totalContributionInPaisa,
-  onClose,
+  ...buttonProps
 }: {
-  isContributable: boolean
-  goal: Pick<Goal, "id" | "name" | "targetAmountInPaisa" | "status">
+  goal: Pick<Goal, "id" | "targetAmountInPaisa">
   goalAllocationInPaisa: number
   totalContributionInPaisa: number
-  onClose?: () => void
-}) {
+} & ComponentProps<typeof Button>) {
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  function handleDialogClose() {
-    setDialogOpen(false)
-    onClose?.()
-  }
 
   return (
     <AppDialog
-      title={`${goal.name} Contribution`}
+      title="Add Contribution"
       open={dialogOpen}
       onOpenChange={(open) => {
         if (!open) {
-          handleDialogClose()
+          setDialogOpen(false)
         }
         setDialogOpen(open)
       }}
       trigger={
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault()
-            setDialogOpen(true)
-          }}
-          disabled={!isContributable}
-        >
+        <Button {...buttonProps}>
+          <Plus />
           Contribute
-        </DropdownMenuItem>
+        </Button>
       }
     >
       {({ close }) => (
@@ -57,7 +45,7 @@ export default function ContributeDropdownMenuItem({
           totalContributionInPaisa={totalContributionInPaisa}
           onSuccess={() => {
             close()
-            onClose?.()
+            setDialogOpen(false)
           }}
         />
       )}

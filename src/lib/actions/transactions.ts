@@ -11,7 +11,8 @@ import {
   getOrCreateMonthlyCycle,
 } from "../finance/monthly-cycle"
 
-import { convertRupeesToPaisa, normalizeDate } from "../utils"
+import { convertRupeesToPaisa } from "../utils"
+import { normalizeDate } from "../utils/date"
 
 export async function addTransactionAction(
   {

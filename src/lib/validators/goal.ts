@@ -14,7 +14,7 @@ export const goalSchema = z.object({
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    return date > today
+    return date >= today
   }, "Target date must be in the future"),
 
   status: goalStatusEnum.default("active"),

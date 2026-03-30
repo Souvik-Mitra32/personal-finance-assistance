@@ -3,15 +3,16 @@
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 
-import { Goal, GoalContribution } from "@/lib/drizzle/schema"
+import { Goal } from "@/lib/drizzle/schema"
 import { formatCurrencyFromPaisa } from "@/lib/formatters"
+import { getGoalProgressData, getGoalStatus } from "@/lib/utils/goal-progress"
 
 import { BellRing } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "../ui/separator"
 import { Label } from "../ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
+import GoalBadge from "../badges/goal-badge"
 import GoalDropdownMenu from "../dropdown-menus/goal-dropdown-menu"
 import {
   Card,
@@ -25,49 +26,44 @@ import {
 export default function GoalCard({
   goalAllocationInPaisa,
   goal,
-  contributions,
+  totalContributionInPaisa,
 }: {
   goalAllocationInPaisa: number
   goal: Pick<
     Goal,
     "id" | "name" | "status" | "targetAmountInPaisa" | "targetDate" | "slug"
   >
-  contributions: GoalContribution[]
+  totalContributionInPaisa: number
 }) {
   const router = useRouter()
   const goalProgressData = getGoalProgressData(
     goal.targetAmountInPaisa,
-    contributions,
+    totalContributionInPaisa,
   )
 
-  const badgeVariant =
-    goal.status === "paused"
-      ? "outline"
-      : goal.status === "completed"
-        ? "success"
-        : goal.status === "cancelled"
-          ? "destructive"
-          : ("default" as const)
+  const status = getGoalStatus(goal, totalContributionInPaisa)
+  const isContributable = status === "active"
 
   return (
-    <Card
-      onClick={() => router.push(`/goals/${goal.slug}`)}
-      className="cursor-pointer"
-    >
+    <Card>
       <CardHeader>
         <div className="flex items-center space-x-2">
           <CardTitle>{goal.name}</CardTitle>
-          <Badge variant={badgeVariant}>{goal.status}</Badge>
+          <GoalBadge status={status} />
         </div>
         <CardAction>
           <GoalDropdownMenu
             goal={goal}
             goalAllocationInPaisa={goalAllocationInPaisa}
-            totalContributionInPaisa={goalProgressData.totalContributionInPaisa}
+            totalContributionInPaisa={totalContributionInPaisa}
+            isContributable={isContributable}
           />
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent
+        onClick={() => router.push(`/goals/${goal.slug}`)}
+        className="cursor-pointer"
+      >
         <div className="space-y-4">
           <div className="space-y-2">
             <div className="text-xl font-medium">
@@ -76,9 +72,7 @@ export default function GoalCard({
             <Progress value={goalProgressData.progressPercentage} />
             <div className="flex items-center gap-4">
               <div className="mr-auto text-lg font-medium">
-                {formatCurrencyFromPaisa(
-                  goalProgressData.totalContributionInPaisa,
-                )}{" "}
+                {formatCurrencyFromPaisa(totalContributionInPaisa)}{" "}
                 <span className="text-sm text-muted-foreground">
                   Saved so far
                 </span>
@@ -123,33 +117,4 @@ export default function GoalCard({
       </CardFooter>
     </Card>
   )
-}
-
-function getGoalProgressData(
-  target: number,
-  contributions: GoalContribution[],
-) {
-  const saved = contributions.reduce((a, c) => a + c.amountInPaisa, 0)
-
-  if (saved === 0)
-    return {
-      totalContributionInPaisa: 0,
-      remainingInPaisa: target,
-      progressPercentage: 0,
-    }
-
-  if (saved >= target)
-    return {
-      totalContributionInPaisa: target,
-      remainingInPaisa: 0,
-      progressPercentage: 100,
-    }
-
-  const progressPercentage = (saved / target) * 100
-
-  return {
-    totalContributionInPaisa: saved,
-    remainingInPaisa: target - saved,
-    progressPercentage: Math.min(progressPercentage, 100),
-  }
 }

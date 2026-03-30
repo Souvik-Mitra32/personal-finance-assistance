@@ -5,16 +5,7 @@ import { Transaction } from "@/lib/drizzle/schema"
 import { cn } from "@/lib/utils"
 import { formatCurrencyFromPaisa } from "@/lib/formatters"
 
-import { MoreHorizontalIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import EditTransactionDropdownMenuItem from "../dropdown-menu-items/edit-transaction-dropdown-menu-item"
-import DeleteTransactionDropdownMenuItem from "../dropdown-menu-items/delete-transaction-dropdown-menu-item"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import TransactionDropdownMenu from "../dropdown-menus/transaction-dropdown-menu"
 import {
   Table,
   TableBody,
@@ -23,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import TransactionDropdownMenu from "../dropdown-menus/transaction-dropdown-menu"
 
 export default function TransactionsTable({
   financialProfileId,

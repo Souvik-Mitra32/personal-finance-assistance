@@ -1,9 +1,11 @@
 export const DEFAULT_RESEND_EMAIL_TIMER = 30 // in seconds
 
-// Default to tomorrow
-export const DEFAULT_GOAL_TARGET_DATE = new Date(
-  Date.now() + 24 * 60 * 60 * 1000,
-)
+// Default goal target date is set to 30 days from the current date
+export const DEFAULT_GOAL_TARGET_DATE =
+  new Date().getTime() + 30 * 24 * 60 * 60 * 1000
+
+// Get user's timezone (you can store this in user preferences)
+export const DEFAULT_TIMEZONE = "Asia/Kolkata" // IST
 
 export const DEBIT_TRANSACTION_CATEGORIES = [
   "food",

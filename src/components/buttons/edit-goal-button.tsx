@@ -1,31 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { ComponentProps, useState } from "react"
 
 import { Goal } from "@/lib/drizzle/schema"
 
-import { DropdownMenuItem } from "../ui/dropdown-menu"
+import { SquarePen } from "lucide-react"
+import { Button } from "../ui/button"
 import AppDialog from "@/components/app-dialog"
 import GoalForm from "../forms/goal-form"
 
-export default function EditGoalDropdownMenuItem({
+export default function EditGoalButton({
   goal,
   totalContributionInPaisa,
-  onClose,
+  ...buttonProps
 }: {
   goal: Pick<
     Goal,
     "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status"
   >
   totalContributionInPaisa: number
-  onClose?: () => void
-}) {
+} & ComponentProps<typeof Button>) {
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  function handleDialogClose() {
-    setDialogOpen(false)
-    onClose?.()
-  }
 
   return (
     <AppDialog
@@ -33,19 +28,15 @@ export default function EditGoalDropdownMenuItem({
       open={dialogOpen}
       onOpenChange={(open) => {
         if (!open) {
-          handleDialogClose()
+          setDialogOpen(false)
         }
         setDialogOpen(open)
       }}
       trigger={
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault()
-            setDialogOpen(true)
-          }}
-        >
+        <Button {...buttonProps}>
+          <SquarePen />
           Edit
-        </DropdownMenuItem>
+        </Button>
       }
     >
       {({ close }) => (
@@ -54,7 +45,7 @@ export default function EditGoalDropdownMenuItem({
           totalContributionInPaisa={totalContributionInPaisa}
           onSuccess={() => {
             close()
-            onClose?.()
+            setDialogOpen(false)
           }}
         />
       )}

@@ -2,13 +2,11 @@ import { redirect } from "next/navigation"
 
 import { getCurrentUser } from "@/lib/queries/auth"
 import { getFinancialProfileByUserId } from "@/lib/queries/financial-profiles"
-import { getGoalsByFinancialProfileId } from "@/lib/queries/goals"
+import { getAllGoals } from "@/lib/queries/goals"
 import { getOrCreateMonthlyCycle } from "@/lib/finance/monthly-cycle"
 
 import GoalCard from "@/components/cards/goal-card"
 import AddGoalButton from "@/components/buttons/add-goal-button"
-import { getContributionsByGoalId } from "@/lib/queries/goal-contributions"
-import { Goal } from "@/lib/drizzle/schema"
 
 export default async function GoalsPage() {
   const user = await getCurrentUser()
@@ -19,7 +17,7 @@ export default async function GoalsPage() {
   const cycle = await getOrCreateMonthlyCycle(financialProfile.id, new Date())
   if (cycle == null) redirect("/")
 
-  const goals = await getGoalsByFinancialProfileId(financialProfile.id)
+  const goals = await getAllGoals(financialProfile.id)
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4">
@@ -36,33 +34,16 @@ export default async function GoalsPage() {
 
         <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-4">
           {/* TODO: Add empty state */}
-          {goals.map((goal) => (
-            <GoalCardWrapper
+          {goals.map(({ goal, totalContributionInPaisa }) => (
+            <GoalCard
               key={goal.id}
-              goal={goal}
               goalAllocationInPaisa={cycle.goalAllocationInPaisa}
+              goal={goal}
+              totalContributionInPaisa={totalContributionInPaisa}
             />
           ))}
         </div>
       </section>
     </main>
-  )
-}
-
-async function GoalCardWrapper({
-  goalAllocationInPaisa,
-  goal,
-}: {
-  goalAllocationInPaisa: number
-  goal: Goal
-}) {
-  const contributions = await getContributionsByGoalId(goal.id)
-
-  return (
-    <GoalCard
-      goal={goal}
-      goalAllocationInPaisa={goalAllocationInPaisa}
-      contributions={contributions}
-    />
   )
 }
