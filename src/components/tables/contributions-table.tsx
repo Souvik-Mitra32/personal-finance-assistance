@@ -1,8 +1,11 @@
 import { format } from "date-fns"
 
-import { cn } from "@/lib/utils"
+import { Goal, GoalContribution } from "@/lib/drizzle/schema"
+import { getContributionsByGoalId } from "@/lib/queries/goal-contributions"
+
 import { formatCurrencyFromPaisa } from "@/lib/formatters"
 
+import ContributionDropdownMenu from "../dropdown-menus/contribution-dropdown-menu"
 import {
   Table,
   TableBody,
@@ -11,9 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { MoreHorizontal } from "lucide-react"
 
-export default function ContributionsTable() {
+export default function ContributionsTable({
+  goal,
+  contributions,
+  totalContributionInPaisa,
+}: {
+  goal: Pick<Goal, "id" | "targetAmountInPaisa">
+  contributions: GoalContribution[]
+  totalContributionInPaisa: number
+}) {
   return (
     <Table className="text-gray-500">
       <TableHeader>
@@ -27,18 +37,28 @@ export default function ContributionsTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell className="text-green-500 font-medium">
-            +{formatCurrencyFromPaisa(100000)}
-          </TableCell>
-          <TableCell>Mar 27, 2026</TableCell>
-          <TableCell>
-            <p className="truncate">Nothing</p>
-          </TableCell>
-          <TableCell className="text-right">
-            <MoreHorizontal size={16} />
-          </TableCell>
-        </TableRow>
+        {contributions.map((contribution) => (
+          <TableRow key={contribution.id}>
+            <TableCell className="text-green-500 font-medium">
+              +{formatCurrencyFromPaisa(contribution.amountInPaisa)}
+            </TableCell>
+            <TableCell>
+              {format(contribution.createdAt, "MMM dd, yyyy")}
+            </TableCell>
+            <TableCell>
+              <p className="max-w-[30ch] truncate">
+                {contribution.note ?? "NA"}
+              </p>
+            </TableCell>
+            <TableCell className="text-right">
+              <ContributionDropdownMenu
+                goal={goal}
+                totalContributionInPaisa={totalContributionInPaisa}
+                contribution={contribution}
+              />
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   )

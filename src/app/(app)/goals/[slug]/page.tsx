@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import DeleteGoalButton from "@/components/buttons/delete-goal-button"
+import { getContributionsByGoalId } from "@/lib/queries/goal-contributions"
 
 export default async function GoalDetailsPage({
   params,
@@ -44,6 +45,8 @@ export default async function GoalDetailsPage({
   if (data == null) return notFound()
 
   const { goal, totalContributionInPaisa } = data
+
+  const contributions = await getContributionsByGoalId(goal.id)
   const today = normalizeDate(new Date())
   const targetDate = normalizeDate(goal.targetDate)
 
@@ -83,7 +86,9 @@ export default async function GoalDetailsPage({
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Progress</CardTitle>
-              <CardDescription>{progressPercentage}% complete</CardDescription>
+              <CardDescription>
+                {progressPercentage.toFixed(0)}% complete
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -152,7 +157,11 @@ export default async function GoalDetailsPage({
 
           <Card>
             <CardContent>
-              <ContributionsTable />
+              <ContributionsTable
+                goal={goal}
+                contributions={contributions}
+                totalContributionInPaisa={totalContributionInPaisa}
+              />
             </CardContent>
           </Card>
         </div>

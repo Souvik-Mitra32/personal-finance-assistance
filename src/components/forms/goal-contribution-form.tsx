@@ -4,9 +4,14 @@ import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 
-import { Goal } from "@/lib/drizzle/schema"
+import { Goal, GoalContribution } from "@/lib/drizzle/schema"
 import { goalContributionSchema } from "@/lib/validators/goal-contribution"
-import { addGoalContributionAction } from "@/lib/actions/goal-contributions"
+import {
+  addGoalContributionAction,
+  editGoalContributionAction,
+} from "@/lib/actions/goal-contributions"
+
+import { convertPaisaToRupees } from "@/lib/utils"
 
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -24,11 +29,13 @@ export default function GoalContributionForm({
   goal: { id: goalId, targetAmountInPaisa },
   goalAllocationInPaisa,
   totalContributionInPaisa,
+  contribution,
   onSuccess,
 }: {
   goal: Pick<Goal, "id" | "targetAmountInPaisa">
-  goalAllocationInPaisa: number
+  goalAllocationInPaisa?: number
   totalContributionInPaisa: number
+  contribution?: Pick<GoalContribution, "id" | "amountInPaisa" | "note">
   onSuccess: () => void
 }) {
   const {
@@ -40,14 +47,24 @@ export default function GoalContributionForm({
   } = useForm({
     resolver: zodResolver(goalContributionSchema),
     defaultValues: {
-      note: "",
+      note: contribution?.note ?? "",
+      amount: contribution?.amountInPaisa
+        ? convertPaisaToRupees(contribution.amountInPaisa)
+        : null,
     },
   })
 
-  async function onSubmit(
-    contribution: z.infer<typeof goalContributionSchema>,
-  ) {
-    const res = await addGoalContributionAction(goalId, contribution)
+  const existingContribution = contribution ? contribution.amountInPaisa : 0
+  const maxAllowed = convertPaisaToRupees(
+    targetAmountInPaisa - (totalContributionInPaisa - existingContribution),
+  )
+
+  async function onSubmit(data: z.infer<typeof goalContributionSchema>) {
+    const action = contribution
+      ? editGoalContributionAction(contribution.id, data)
+      : addGoalContributionAction(goalId, data)
+
+    const res = await action
 
     if (!res.success) {
       toast.error(res.error || "Failed to add contribution")
@@ -74,7 +91,8 @@ export default function GoalContributionForm({
 
               <NumberInput
                 id={field.name}
-                min={0}
+                min={1}
+                max={maxAllowed}
                 value={(field.value as number | null) ?? null}
                 onChange={field.onChange}
                 aria-invalid={fieldState.invalid}

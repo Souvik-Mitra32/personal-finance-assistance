@@ -4,8 +4,14 @@ import { refresh } from "next/cache"
 import { eq, sql } from "drizzle-orm"
 
 import { db } from "../drizzle/db"
+import {
+  goal as goalTable,
+  goalContribution,
+  GoalContribution,
+  Goal,
+} from "../drizzle/schema"
 import { getGoalById } from "../queries/goals"
-import { goalContribution } from "../drizzle/schema"
+import { getCurrentUser } from "../queries/auth"
 
 import { convertRupeesToPaisa } from "../utils"
 import { getGoalStatus } from "../utils/goal-progress"
@@ -59,6 +65,105 @@ export async function addGoalContributionAction(
     await tx
       .insert(goalContribution)
       .values({ goalId, amountInPaisa, note: contribution.note })
+  })
+
+  if (options?.redirectOnSuccess !== false) refresh()
+
+  return { success: true, error: null }
+}
+
+export async function editGoalContributionAction(
+  contributionId: string,
+  contribution: {
+    amount: number
+    note: string | null
+  },
+  options?: { redirectOnSuccess?: boolean },
+) {
+  await getCurrentUser()
+
+  const { amount, note } = contribution
+  const amountInPaisa = convertRupeesToPaisa(amount)
+
+  await db.transaction(async (tx) => {
+    const rows = await tx
+      .select({
+        contribution: goalContribution,
+        goal: goalTable,
+      })
+      .from(goalContribution)
+      .innerJoin(goalTable, eq(goalContribution.goalId, goalTable.id))
+      .where(eq(goalContribution.id, contributionId))
+      .limit(1)
+
+    if (!rows || rows.length === 0) {
+      throw new Error("Contribution not found")
+    }
+
+    const { contribution, goal } = rows[0] as {
+      contribution: GoalContribution
+      goal: Goal
+    }
+
+    const totalResult = await tx
+      .select({
+        total: sql<number>`coalesce(sum(${goalContribution.amountInPaisa}), 0)`,
+      })
+      .from(goalContribution)
+      .where(eq(goalContribution.goalId, goal.id))
+
+    const totalContributionInPaisa = totalResult[0]?.total ?? 0
+
+    const status = getGoalStatus(goal, totalContributionInPaisa)
+
+    if (status !== "active") throw new Error("Goal is not active")
+
+    // Compute max allowed
+    const maxAllowed =
+      goal.targetAmountInPaisa -
+      (totalContributionInPaisa - contribution.amountInPaisa)
+
+    if (amountInPaisa > maxAllowed) {
+      throw new Error("Amount exceeds allowed limit")
+    }
+
+    await tx
+      .update(goalContribution)
+      .set({
+        amountInPaisa,
+        note,
+      })
+      .where(eq(goalContribution.id, contributionId))
+  })
+
+  if (options?.redirectOnSuccess !== false) refresh()
+
+  return { success: true, error: null }
+}
+
+export async function deleteGoalContributionAction(
+  contributionId: string,
+  options?: { redirectOnSuccess?: boolean },
+) {
+  await getCurrentUser()
+
+  await db.transaction(async (tx) => {
+    const row = await tx
+      .select({
+        id: goalContribution.id,
+        goalId: goalContribution.goalId,
+      })
+      .from(goalContribution)
+      .where(eq(goalContribution.id, contributionId))
+      .limit(1)
+
+    if (!row || row.length === 0) {
+      throw new Error("Contribution not found")
+    }
+
+    await tx
+      .delete(goalContribution)
+      .where(eq(goalContribution.id, contributionId))
   })
 
   if (options?.redirectOnSuccess !== false) refresh()
