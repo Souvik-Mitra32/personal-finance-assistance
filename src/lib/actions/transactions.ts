@@ -80,7 +80,10 @@ export async function addTransactionAction(
     }
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (!shouldRedirect) {
+    refresh()
+  }
 
   return { success: true, error: null }
 }
@@ -164,7 +167,10 @@ export async function editTransactionAction(
     }
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (!shouldRedirect) {
+    refresh()
+  }
 
   return { success: true, error: null }
 }
@@ -201,7 +207,10 @@ export async function deleteTransactionAction(
     }
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (!shouldRedirect) {
+    refresh()
+  }
 
   return { success: true, error: null }
 }

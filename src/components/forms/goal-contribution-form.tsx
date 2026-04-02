@@ -1,10 +1,11 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 
-import { Goal, GoalContribution } from "@/lib/drizzle/schema"
+import { goal, Goal, GoalContribution } from "@/lib/drizzle/schema"
 import { goalContributionSchema } from "@/lib/validators/goal-contribution"
 import {
   addGoalContributionAction,
@@ -26,18 +27,20 @@ import {
 } from "@/components/ui/field"
 
 export default function GoalContributionForm({
-  goal: { id: goalId, targetAmountInPaisa },
+  goal: { id: goalId, targetAmountInPaisa, slug },
   goalAllocationInPaisa,
   totalContributionInPaisa,
   contribution,
   onSuccess,
 }: {
-  goal: Pick<Goal, "id" | "targetAmountInPaisa">
+  goal: Pick<Goal, "id" | "targetAmountInPaisa" | "slug">
   goalAllocationInPaisa?: number
   totalContributionInPaisa: number
   contribution?: Pick<GoalContribution, "id" | "amountInPaisa" | "note">
   onSuccess: () => void
 }) {
+  const router = useRouter()
+
   const {
     control,
     handleSubmit,
@@ -69,6 +72,10 @@ export default function GoalContributionForm({
     if (!res.success) {
       toast.error(res.error || "Failed to add contribution")
       return
+    }
+
+    if (contribution) {
+      router.push(`/goals/${slug}`)
     }
 
     reset()

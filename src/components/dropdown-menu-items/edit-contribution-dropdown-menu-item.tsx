@@ -16,7 +16,7 @@ export default function EditContributionDropdownMenuItem({
 }: {
   goal: Pick<Goal, "id" | "targetAmountInPaisa">
   totalContributionInPaisa: number
-  contribution: Partial<GoalContribution>
+  contribution: GoalContribution
   onClose?: () => void
 }) {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -28,7 +28,7 @@ export default function EditContributionDropdownMenuItem({
 
   return (
     <AppDialog
-      title="Edit Transaction"
+      title="Edit Contribution"
       open={dialogOpen}
       onOpenChange={(open) => {
         if (!open) {

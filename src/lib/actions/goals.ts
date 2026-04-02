@@ -55,13 +55,20 @@ export async function createGoalAction(
       status,
       slug: createSlug(name),
     })
-    .returning({ id: goalTable.id })
+    .returning({ slug: goalTable.slug })
 
   if (!rows || rows.length === 0) {
     return { success: false, error: "Failed to create goal" }
   }
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const newGoal = rows[0]!
+
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (shouldRedirect) {
+    redirect(`/goals/${newGoal.slug}`)
+  } else {
+    refresh()
+  }
 
   return { success: true, error: null }
 }
@@ -143,8 +150,12 @@ export async function editGoalAction(
     return updatedGoal
   })
 
-  if (options?.redirectOnSuccess !== false)
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (shouldRedirect) {
     redirect(`/goals/${updatedGoal.slug}`)
+  } else {
+    refresh()
+  }
 
   return { success: true, error: null }
 }
@@ -195,7 +206,12 @@ export async function deleteGoalAction(
     await tx.delete(goalTable).where(eq(goalTable.id, goalId))
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (shouldRedirect) {
+    redirect("/goals")
+  } else {
+    refresh()
+  }
 
   return { success: true, error: null }
 }

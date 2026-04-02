@@ -1,5 +1,6 @@
 "use server"
 
+import { redirect } from "next/navigation"
 import { refresh } from "next/cache"
 import { eq, sql } from "drizzle-orm"
 
@@ -67,7 +68,12 @@ export async function addGoalContributionAction(
       .values({ goalId, amountInPaisa, note: contribution.note })
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (shouldRedirect) {
+    redirect(`/goals/${goal.slug}`)
+  } else {
+    refresh()
+  }
 
   return { success: true, error: null }
 }
@@ -85,7 +91,7 @@ export async function editGoalContributionAction(
   const { amount, note } = contribution
   const amountInPaisa = convertRupeesToPaisa(amount)
 
-  await db.transaction(async (tx) => {
+  const goal = await db.transaction(async (tx) => {
     const rows = await tx
       .select({
         contribution: goalContribution,
@@ -116,7 +122,8 @@ export async function editGoalContributionAction(
 
     const status = getGoalStatus(goal, totalContributionInPaisa)
 
-    if (status !== "active") throw new Error("Goal is not active")
+    if (status !== "active" && status !== "completed")
+      throw new Error("Goal is not active")
 
     // Compute max allowed
     const maxAllowed =
@@ -134,9 +141,16 @@ export async function editGoalContributionAction(
         note,
       })
       .where(eq(goalContribution.id, contributionId))
+
+    return goal
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (shouldRedirect) {
+    redirect(`/goals/${goal.slug}`)
+  } else {
+    refresh()
+  }
 
   return { success: true, error: null }
 }
@@ -166,7 +180,10 @@ export async function deleteGoalContributionAction(
       .where(eq(goalContribution.id, contributionId))
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  const shouldRedirect = options?.redirectOnSuccess === true
+  if (!shouldRedirect) {
+    refresh()
+  }
 
   return { success: true, error: null }
 }

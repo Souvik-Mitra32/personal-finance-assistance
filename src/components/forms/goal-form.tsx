@@ -46,7 +46,7 @@ export default function GoalForm({
 }: {
   defaultValues?: Pick<
     Goal,
-    "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status"
+    "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status" | "slug"
   >
   totalContributionInPaisa?: number
   onSuccess: () => void
@@ -92,7 +92,7 @@ export default function GoalForm({
       ? editGoalAction(defaultValues.id, submitData, {
           redirectOnSuccess: true,
         })
-      : createGoalAction(submitData, { redirectOnSuccess: false })
+      : createGoalAction(submitData, { redirectOnSuccess: true })
     const res = await action
 
     if (!res.success) {
@@ -211,7 +211,7 @@ export default function GoalForm({
                         const today = new Date()
                         today.setHours(0, 0, 0, 0)
                         const compareDate = normalizeDate(date)
-                        return compareDate < today
+                        return compareDate <= today
                       }}
                     />
                   </PopoverContent>
