@@ -9,10 +9,10 @@ import TransactionForm from "@/components/forms/transaction-form"
 
 export default function AddTransactionButton({
   financialProfileId,
-  cycleStartDay,
+  cycleStartDate,
 }: {
   financialProfileId: string
-  cycleStartDay: number
+  cycleStartDate: Date
 }) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -36,7 +36,7 @@ export default function AddTransactionButton({
       {({ close }) => (
         <TransactionForm
           financialProfileId={financialProfileId}
-          cycleStartDay={cycleStartDay}
+          cycleStartDate={cycleStartDate}
           onSuccess={() => {
             close()
             setDialogOpen(false)

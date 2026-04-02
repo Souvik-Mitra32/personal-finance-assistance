@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { determineCycleWindow } from "@/lib/finance/monthly-cycle"
 
 export default function TransactionsTable({
   financialProfileId,
@@ -24,6 +25,7 @@ export default function TransactionsTable({
   cycleStartDay: number
   transactions: Transaction[]
 }) {
+  const { cycleStartDate } = determineCycleWindow(new Date(), cycleStartDay)
   return (
     <Table className="text-gray-500">
       <TableHeader>
@@ -57,7 +59,7 @@ export default function TransactionsTable({
               <TableCell className="text-right">
                 <TransactionDropdownMenu
                   financialProfileId={financialProfileId}
-                  cycleStartDay={cycleStartDay}
+                  cycleStartDate={cycleStartDate}
                   transaction={tx}
                 />
               </TableCell>

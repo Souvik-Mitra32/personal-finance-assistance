@@ -1,6 +1,7 @@
 "use server"
 
 import { refresh } from "next/cache"
+import { redirect } from "next/navigation"
 import { and, eq, sql } from "drizzle-orm"
 import { isPast } from "date-fns"
 
@@ -85,7 +86,7 @@ export async function editGoalAction(
     }
   }
 
-  await db.transaction(async (tx) => {
+  const updatedGoal = await db.transaction(async (tx) => {
     const rows = await tx
       .select({
         goal: goalTable,
@@ -123,7 +124,7 @@ export async function editGoalAction(
       )
     }
 
-    await tx
+    const [updatedGoal] = await tx
       .update(goalTable)
       .set({
         name,
@@ -133,9 +134,17 @@ export async function editGoalAction(
         slug: createSlug(name),
       })
       .where(and(eq(goalTable.id, goalId)))
+      .returning({ slug: goalTable.slug })
+
+    if (updatedGoal == null) {
+      throw new Error("Failed to update goal")
+    }
+
+    return updatedGoal
   })
 
-  if (options?.redirectOnSuccess !== false) refresh()
+  if (options?.redirectOnSuccess !== false)
+    redirect(`/goals/${updatedGoal.slug}`)
 
   return { success: true, error: null }
 }

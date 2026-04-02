@@ -7,12 +7,18 @@ import { getTransactionsByFinancialProfileId } from "@/lib/queries/transactions"
 import { Card, CardContent } from "@/components/ui/card"
 import TransactionsTable from "@/components/tables/transactions-table"
 import AddTransactionButton from "@/components/buttons/add-transaction-button"
+import { determineCycleWindow } from "@/lib/finance/monthly-cycle"
 
 export default async function TransactionsPage() {
   const user = await getCurrentUser()
   const financialProfile = await getFinancialProfileByUserId(user.id)
 
   if (financialProfile == null) redirect("/")
+
+  const { cycleStartDate } = determineCycleWindow(
+    new Date(),
+    financialProfile.cycleStartDay,
+  )
 
   const transactions = await getTransactionsByFinancialProfileId(
     financialProfile.id,
@@ -31,7 +37,7 @@ export default async function TransactionsPage() {
 
             <AddTransactionButton
               financialProfileId={financialProfile.id}
-              cycleStartDay={financialProfile.cycleStartDay}
+              cycleStartDate={cycleStartDate}
             />
           </div>
         </div>

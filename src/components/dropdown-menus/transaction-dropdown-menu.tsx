@@ -17,11 +17,11 @@ import {
 
 export default function TransactionDropdownMenu({
   financialProfileId,
-  cycleStartDay,
+  cycleStartDate,
   transaction,
 }: {
   financialProfileId: string
-  cycleStartDay: number
+  cycleStartDate: Date
   transaction: Transaction
 }) {
   const [open, setOpen] = useState(false)
@@ -37,7 +37,7 @@ export default function TransactionDropdownMenu({
       <DropdownMenuContent align="end">
         <EditTransactionDropdownMenuItem
           financialProfileId={financialProfileId}
-          cycleStartDay={cycleStartDay}
+          cycleStartDate={cycleStartDate}
           defaultValues={transaction}
           onClose={() => setOpen(false)}
         />

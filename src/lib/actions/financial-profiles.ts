@@ -34,7 +34,7 @@ export async function createFinancialProfileAction(
   if (rows == null || rows.length === 0)
     return { success: false, error: "Failed to create financial profile" }
 
-  const newFinancialProfile = rows[0]
+  const newFinancialProfile = rows[0] as { id: string }
 
   const monthlyCycle = await getOrCreateMonthlyCycle(
     newFinancialProfile.id,

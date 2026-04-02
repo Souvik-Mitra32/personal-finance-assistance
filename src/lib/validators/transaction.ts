@@ -4,10 +4,8 @@ import {
   DEBIT_TRANSACTION_CATEGORIES,
 } from "@/data/constants"
 
-export function createTransactionSchema(cycleStartDay: number) {
-  const minDate = new Date()
-  minDate.setDate(cycleStartDay)
-  minDate.setHours(0, 0, 0, 0)
+export function createTransactionSchema(cycleStartDate: Date) {
+  const minDate = cycleStartDate
 
   return z
     .object({
@@ -23,7 +21,7 @@ export function createTransactionSchema(cycleStartDay: number) {
         .max(100, "Must be within 100 characters"),
 
       date: z.date().refine((d) => d >= minDate, {
-        message: `Date must be after ${cycleStartDay}`,
+        message: `Date must be after ${minDate.getDate()}`,
       }),
 
       note: z.string({ error: "Required" }).max(300).optional(),

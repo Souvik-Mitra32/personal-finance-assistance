@@ -7,10 +7,12 @@ import { format } from "date-fns"
 import z from "zod"
 
 import { Transaction } from "@/lib/drizzle/schema"
+import { fromDatabase, normalizeDate } from "@/lib/utils/date"
 import {
   addTransactionAction,
   editTransactionAction,
 } from "@/lib/actions/transactions"
+
 import {
   CREDIT_TRANSACTION_CATEGORIES,
   DEBIT_TRANSACTION_CATEGORIES,
@@ -46,12 +48,12 @@ import {
 
 export default function TransactionForm({
   financialProfileId,
-  cycleStartDay,
+  cycleStartDate,
   defaultValues,
   onSuccess,
 }: {
   financialProfileId: string
-  cycleStartDay: number
+  cycleStartDate: Date
   defaultValues?: Pick<
     Transaction,
     | "id"
@@ -64,7 +66,18 @@ export default function TransactionForm({
   >
   onSuccess: () => void
 }) {
-  const transactionSchema = createTransactionSchema(cycleStartDay)
+  const transactionSchema = createTransactionSchema(cycleStartDate)
+
+  function getInitialDate() {
+    if (defaultValues?.date) {
+      if (defaultValues.date instanceof Date) {
+        return fromDatabase(defaultValues.date)
+      }
+      return new Date(defaultValues.date)
+    }
+    return fromDatabase(new Date())
+  }
+
   const {
     control,
     handleSubmit,
@@ -76,7 +89,7 @@ export default function TransactionForm({
     defaultValues: {
       amount: defaultValues ? defaultValues.amountInPaisa / 100 : undefined,
       description: defaultValues ? defaultValues.description : "",
-      date: defaultValues ? new Date(defaultValues.date) : new Date(),
+      date: getInitialDate(),
       type: defaultValues
         ? defaultValues.type === "credit"
           ? "credit"
@@ -91,20 +104,16 @@ export default function TransactionForm({
       ? DEBIT_TRANSACTION_CATEGORIES
       : CREDIT_TRANSACTION_CATEGORIES
 
-  const minDate = new Date()
-  minDate.setDate(cycleStartDay)
-  minDate.setHours(0, 0, 0, 0)
-
   async function onSubmit(data: z.infer<typeof transactionSchema>) {
     const action = defaultValues
       ? editTransactionAction({
           transactionId: defaultValues.id,
-          cycleStartDay,
+          cycleStartDate,
           unsafeData: data,
         })
       : addTransactionAction({
           financialProfileId,
-          cycleStartDay,
+          cycleStartDate,
           unsafeData: data,
         })
     const res = await action
@@ -210,7 +219,13 @@ export default function TransactionForm({
                       selected={field.value}
                       onSelect={(d) => d && field.onChange(d)}
                       defaultMonth={field.value}
-                      disabled={(date) => date < minDate || date > new Date()}
+                      disabled={(d) => {
+                        const today = new Date()
+                        const date = normalizeDate(d)
+                        const minDate = normalizeDate(cycleStartDate)
+
+                        return date > today || date < minDate
+                      }}
                     />
                   </PopoverContent>
                 </Popover>

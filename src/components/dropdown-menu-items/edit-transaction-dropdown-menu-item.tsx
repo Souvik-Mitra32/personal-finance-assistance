@@ -10,12 +10,12 @@ import TransactionForm from "@/components/forms/transaction-form"
 
 export default function EditTransactionDropdownMenuItem({
   financialProfileId,
-  cycleStartDay,
+  cycleStartDate,
   defaultValues,
   onClose,
 }: {
   financialProfileId: string
-  cycleStartDay: number
+  cycleStartDate: Date
   defaultValues: Pick<
     Transaction,
     | "id"
@@ -59,7 +59,7 @@ export default function EditTransactionDropdownMenuItem({
       {({ close }) => (
         <TransactionForm
           financialProfileId={financialProfileId}
-          cycleStartDay={cycleStartDay}
+          cycleStartDate={cycleStartDate}
           defaultValues={defaultValues}
           onSuccess={() => {
             close()

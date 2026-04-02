@@ -78,7 +78,7 @@ export default function GoalCard({
                 </span>
               </div>
               <div className="text-muted-foreground">
-                {goalProgressData.progressPercentage}%
+                {goalProgressData.progressPercentage.toFixed(0)}%
               </div>
             </div>
           </div>

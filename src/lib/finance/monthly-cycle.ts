@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle/db"
 import { financialProfile } from "../drizzle/schema"
 import { monthlyCycle } from "@/lib/drizzle/schemas/monthly-cycle"
 import { getCycleFinancialState } from "./financial-state"
+import { toDatabase } from "../utils/date"
 
 export async function getOrCreateMonthlyCycle(
   financialProfileId: string,
@@ -55,8 +56,8 @@ export async function getOrCreateMonthlyCycle(
       financialProfileId,
 
       cycleMonth,
-      cycleStartDate,
-      cycleEndDate,
+      cycleStartDate: toDatabase(cycleStartDate),
+      cycleEndDate: toDatabase(cycleEndDate),
 
       baseSurplusInPaisa: numbers.baseSurplus,
       carryoverDeficitInPaisa: numbers.carryoverDeficit,

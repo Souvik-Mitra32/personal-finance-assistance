@@ -12,21 +12,21 @@ import {
 } from "../finance/monthly-cycle"
 
 import { convertRupeesToPaisa } from "../utils"
-import { normalizeDate } from "../utils/date"
+import { normalizeDate, toDatabase } from "../utils/date"
 
 export async function addTransactionAction(
   {
     financialProfileId,
-    cycleStartDay,
+    cycleStartDate,
     unsafeData,
   }: {
     financialProfileId: string
-    cycleStartDay: number
+    cycleStartDate: Date
     unsafeData: unknown
   },
   options?: { redirectOnSuccess?: boolean },
 ) {
-  const transactionSchema = createTransactionSchema(cycleStartDay)
+  const transactionSchema = createTransactionSchema(cycleStartDate)
   const result = transactionSchema.safeParse(unsafeData)
 
   if (!result.success) return { success: false, error: "Invalid inputs" }
@@ -60,7 +60,7 @@ export async function addTransactionAction(
       error: "Future transactions not allowed",
     }
 
-  const { amount, ...rest } = data
+  const { amount, date, ...rest } = data
   const amountInPaisa = convertRupeesToPaisa(amount)
 
   await db.transaction(async (tx) => {
@@ -68,6 +68,7 @@ export async function addTransactionAction(
       .insert(transaction)
       .values({
         ...rest,
+        date: toDatabase(date),
         financialProfileId,
         cycleId: cycle.id,
         amountInPaisa,
@@ -87,16 +88,16 @@ export async function addTransactionAction(
 export async function editTransactionAction(
   {
     transactionId,
-    cycleStartDay,
+    cycleStartDate,
     unsafeData,
   }: {
     transactionId: string
-    cycleStartDay: number
+    cycleStartDate: Date
     unsafeData: unknown
   },
   options?: { redirectOnSuccess?: boolean },
 ) {
-  const transactionSchema = createTransactionSchema(cycleStartDay)
+  const transactionSchema = createTransactionSchema(cycleStartDate)
   const result = transactionSchema.safeParse(unsafeData)
 
   if (!result.success) return { success: false, error: "Invalid inputs" }
@@ -143,7 +144,7 @@ export async function editTransactionAction(
     }
   }
 
-  const { amount, ...rest } = data
+  const { amount, date, ...rest } = data
   const amountInPaisa = convertRupeesToPaisa(amount)
 
   await db.transaction(async (tx) => {
@@ -151,6 +152,7 @@ export async function editTransactionAction(
       .update(transaction)
       .set({
         ...rest,
+        date: toDatabase(date),
         amountInPaisa,
         cycleId: newCycle.id,
       })

@@ -78,7 +78,6 @@ export default function GoalForm({
       status: defaultValues?.status ?? "active",
     },
   })
-
   const isStatusEditable = getIsStatusEditable(
     defaultValues,
     totalContributionInPaisa,
@@ -91,7 +90,7 @@ export default function GoalForm({
     const submitData = { ...data, targetDate: toDatabase(data.targetDate) }
     const action = defaultValues
       ? editGoalAction(defaultValues.id, submitData, {
-          redirectOnSuccess: false,
+          redirectOnSuccess: true,
         })
       : createGoalAction(submitData, { redirectOnSuccess: false })
     const res = await action
