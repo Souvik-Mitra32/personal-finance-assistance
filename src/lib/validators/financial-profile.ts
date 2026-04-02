@@ -10,5 +10,4 @@ export const financialProfileSchema = z.object({
     .max(100, "Maximum savings rate is 100")
     .default(30),
   currentBalance: z.coerce.number().int().default(0),
-  currentSpends: z.coerce.number().int().optional().default(0),
 })

@@ -1,5 +1,8 @@
 export const DEFAULT_RESEND_EMAIL_TIMER = 30 // in seconds
 
+export const DEFAULT_SAVINGS_RATE = 30
+export const DEFAULT_CYCLE_START_DAY = 5
+
 // Default goal target date is set to 30 days from the current date
 export const DEFAULT_GOAL_TARGET_DATE =
   new Date().getTime() + 30 * 24 * 60 * 60 * 1000

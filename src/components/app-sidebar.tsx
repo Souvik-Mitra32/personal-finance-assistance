@@ -3,13 +3,7 @@
 import { ComponentProps, useEffect } from "react"
 import { usePathname } from "next/navigation"
 
-import {
-  ArrowDownUp,
-  BanknoteArrowDown,
-  Flag,
-  Gem,
-  LayoutDashboard,
-} from "lucide-react"
+import { ArrowDownUp, Bolt, Flag, Gem, LayoutDashboard } from "lucide-react"
 import { NavUser } from "./nav-user"
 import { NavMain } from "./nav-main"
 import {
@@ -41,9 +35,9 @@ const data = {
       icon: ArrowDownUp,
     },
     {
-      title: "Expenses",
-      url: "/expenses",
-      icon: BanknoteArrowDown,
+      title: "Configurations",
+      url: "/configurations",
+      icon: Bolt,
     },
   ],
 }
