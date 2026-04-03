@@ -16,7 +16,7 @@ export default function ContributeDropdownMenuItem({
   onClose,
 }: {
   isContributable: boolean
-  goal: Pick<Goal, "id" | "name" | "targetAmountInPaisa" | "status">
+  goal: Pick<Goal, "id" | "name" | "targetAmountInPaisa" | "status" | "slug">
   goalAllocationInPaisa: number
   totalContributionInPaisa: number
   onClose?: () => void

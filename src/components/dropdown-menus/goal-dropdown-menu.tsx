@@ -25,7 +25,7 @@ export default function GoalDropdownMenu({
 }: {
   goal: Pick<
     Goal,
-    "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status"
+    "id" | "targetAmountInPaisa" | "name" | "targetDate" | "status" | "slug"
   >
   goalAllocationInPaisa: number
   totalContributionInPaisa: number

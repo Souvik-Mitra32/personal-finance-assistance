@@ -4,6 +4,7 @@ import { Transaction } from "@/lib/drizzle/schema"
 
 import { cn } from "@/lib/utils"
 import { formatCurrencyFromPaisa } from "@/lib/formatters"
+import { determineCycleWindow } from "@/lib/finance/monthly-cycle"
 
 import TransactionDropdownMenu from "../dropdown-menus/transaction-dropdown-menu"
 import {
@@ -14,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { determineCycleWindow } from "@/lib/finance/monthly-cycle"
 
 export default function TransactionsTable({
   financialProfileId,
@@ -25,7 +25,6 @@ export default function TransactionsTable({
   cycleStartDay: number
   transactions: Transaction[]
 }) {
-  const { cycleStartDate } = determineCycleWindow(new Date(), cycleStartDay)
   return (
     <Table className="text-gray-500">
       <TableHeader>
@@ -57,15 +56,41 @@ export default function TransactionsTable({
               <TableCell>{format(tx.date, "MMM dd, yyyy")}</TableCell>
               <TableCell>{`${`${tx.category.slice(0, 1).toUpperCase()}${tx.category.slice(1)}`.replace("_", " ")}`}</TableCell>
               <TableCell className="text-right">
-                <TransactionDropdownMenu
-                  financialProfileId={financialProfileId}
-                  cycleStartDate={cycleStartDate}
+                <TransactionDropdownMenuWrapper
                   transaction={tx}
+                  cycleStartDay={cycleStartDay}
+                  financialProfileId={financialProfileId}
                 />
               </TableCell>
             </TableRow>
           ))}
       </TableBody>
     </Table>
+  )
+}
+
+function TransactionDropdownMenuWrapper({
+  transaction,
+  financialProfileId,
+  cycleStartDay,
+}: {
+  transaction: Transaction
+  financialProfileId: string
+  cycleStartDay: number
+}) {
+  const { cycleMonth: transactionCycleMonth, cycleStartDate } =
+    determineCycleWindow(transaction.date, cycleStartDay)
+  const { cycleMonth: currentCycleMonth } = determineCycleWindow(
+    new Date(),
+    cycleStartDay,
+  )
+
+  return (
+    <TransactionDropdownMenu
+      financialProfileId={financialProfileId}
+      cycleStartDate={cycleStartDate}
+      transaction={transaction}
+      isActionable={transactionCycleMonth === currentCycleMonth}
+    />
   )
 }

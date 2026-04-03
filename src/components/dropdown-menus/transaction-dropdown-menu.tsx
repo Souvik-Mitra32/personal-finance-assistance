@@ -19,10 +19,12 @@ export default function TransactionDropdownMenu({
   financialProfileId,
   cycleStartDate,
   transaction,
+  isActionable,
 }: {
   financialProfileId: string
   cycleStartDate: Date
   transaction: Transaction
+  isActionable: boolean
 }) {
   const [open, setOpen] = useState(false)
 
@@ -39,12 +41,14 @@ export default function TransactionDropdownMenu({
           financialProfileId={financialProfileId}
           cycleStartDate={cycleStartDate}
           defaultValues={transaction}
+          isEditable={isActionable}
           onClose={() => setOpen(false)}
         />
         <DropdownMenuSeparator />
         <DeleteTransactionDropdownMenuItem
           transactionId={transaction.id}
           onClose={() => setOpen(false)}
+          isDeletable={!isActionable}
         />
       </DropdownMenuContent>
     </DropdownMenu>

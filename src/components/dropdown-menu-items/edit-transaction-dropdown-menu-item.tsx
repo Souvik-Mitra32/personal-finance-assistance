@@ -12,6 +12,7 @@ export default function EditTransactionDropdownMenuItem({
   financialProfileId,
   cycleStartDate,
   defaultValues,
+  isEditable,
   onClose,
 }: {
   financialProfileId: string
@@ -26,6 +27,7 @@ export default function EditTransactionDropdownMenuItem({
     | "category"
     | "note"
   >
+  isEditable: boolean
   onClose?: () => void
 }) {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -51,6 +53,7 @@ export default function EditTransactionDropdownMenuItem({
             e.preventDefault()
             setDialogOpen(true)
           }}
+          disabled={!isEditable}
         >
           Edit
         </DropdownMenuItem>

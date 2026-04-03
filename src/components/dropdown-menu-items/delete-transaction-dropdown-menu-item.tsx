@@ -6,9 +6,11 @@ import { ActionDropdownMenuItem } from "../ui/action-dropdown-menu-item"
 export default function DeleteTransactionDropdownMenuItem({
   transactionId,
   onClose,
+  isDeletable,
 }: {
   transactionId: string
   onClose?: () => void
+  isDeletable: boolean
 }) {
   async function deleteTransaction() {
     const res = await deleteTransactionAction(transactionId)
@@ -30,6 +32,7 @@ export default function DeleteTransactionDropdownMenuItem({
       onSelect={(e) => e.preventDefault()}
       action={deleteTransaction}
       requireAreYouSure
+      disabled={isDeletable}
     >
       Delete
     </ActionDropdownMenuItem>
