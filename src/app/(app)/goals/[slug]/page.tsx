@@ -61,111 +61,109 @@ export default async function GoalDetailsPage({
   const isContributable = status === "active"
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4">
-      <section className="space-y-5">
+    <section className="space-y-5">
+      <div className="flex justify-between flex-wrap gap-4">
+        <div className="max-w-80 space-y-1">
+          <h1 className="text-2xl font-semibold">{goal.name}</h1>
+          <GoalBadge status={status} />
+        </div>
+
+        <div className="flex gap-3 justify-end">
+          <EditGoalButton
+            goal={goal}
+            totalContributionInPaisa={totalContributionInPaisa}
+            variant="outline"
+          />
+          <DeleteGoalButton
+            goalId={goal.id}
+            disabled={totalContributionInPaisa > 0}
+          />
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Progress</CardTitle>
+            <CardDescription>
+              {progressPercentage.toFixed(0)}% complete
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-baseline space-x-3">
+                  <div className="text-3xl font-semibold">
+                    {formatCurrencyFromPaisa(totalContributionInPaisa)}
+                  </div>
+                </div>
+
+                <Progress value={progressPercentage} />
+
+                <div className="flex justify-between space-x-3 text-muted-foreground">
+                  <div>
+                    {formatCurrencyFromPaisa(remainingInPaisa)} Remaining
+                  </div>
+                  <div>
+                    {Math.max(remainingDays, 0)} day
+                    {Math.max(remainingDays, 0) !== 1 ? "s" : ""} left
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="space-y-2">
+                <div className="text-muted-foreground">Target amount</div>
+                <div className="text-xl">
+                  {formatCurrencyFromPaisa(goal.targetAmountInPaisa)}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-muted-foreground">Target date</div>
+                <div className="text-xl">
+                  {format(goal.targetDate, "MMM d, yyyy")}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-5">
         <div className="flex justify-between flex-wrap gap-4">
           <div className="max-w-80 space-y-1">
-            <h1 className="text-2xl font-semibold">{goal.name}</h1>
-            <GoalBadge status={status} />
+            <h2 className="text-xl font-semibold">Contributions</h2>
           </div>
 
           <div className="flex gap-3 justify-end">
-            <EditGoalButton
+            <AddContributionButton
               goal={goal}
+              goalAllocationInPaisa={cycle.goalAllocationInPaisa}
               totalContributionInPaisa={totalContributionInPaisa}
-              variant="outline"
-            />
-            <DeleteGoalButton
-              goalId={goal.id}
-              disabled={totalContributionInPaisa > 0}
+              disabled={!isContributable}
             />
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-3">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Progress</CardTitle>
-              <CardDescription>
-                {progressPercentage.toFixed(0)}% complete
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-baseline space-x-3">
-                    <div className="text-3xl font-semibold">
-                      {formatCurrencyFromPaisa(totalContributionInPaisa)}
-                    </div>
-                  </div>
-
-                  <Progress value={progressPercentage} />
-
-                  <div className="flex justify-between space-x-3 text-muted-foreground">
-                    <div>
-                      {formatCurrencyFromPaisa(remainingInPaisa)} Remaining
-                    </div>
-                    <div>
-                      {Math.max(remainingDays, 0)} day
-                      {Math.max(remainingDays, 0) !== 1 ? "s" : ""} left
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <div className="text-muted-foreground">Target amount</div>
-                  <div className="text-xl">
-                    {formatCurrencyFromPaisa(goal.targetAmountInPaisa)}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-muted-foreground">Target date</div>
-                  <div className="text-xl">
-                    {format(goal.targetDate, "MMM d, yyyy")}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-5">
-          <div className="flex justify-between flex-wrap gap-4">
-            <div className="max-w-80 space-y-1">
-              <h2 className="text-xl font-semibold">Contributions</h2>
-            </div>
-
-            <div className="flex gap-3 justify-end">
-              <AddContributionButton
-                goal={goal}
-                goalAllocationInPaisa={cycle.goalAllocationInPaisa}
-                totalContributionInPaisa={totalContributionInPaisa}
-                disabled={!isContributable}
-              />
-            </div>
-          </div>
-
-          <Card>
-            <CardContent>
-              <ContributionsTable
-                goal={goal}
-                contributions={contributions}
-                totalContributionInPaisa={totalContributionInPaisa}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-    </main>
+        <Card>
+          <CardContent>
+            <ContributionsTable
+              goal={goal}
+              contributions={contributions}
+              totalContributionInPaisa={totalContributionInPaisa}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </section>
   )
 }

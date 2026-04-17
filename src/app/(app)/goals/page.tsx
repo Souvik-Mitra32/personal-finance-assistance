@@ -20,30 +20,28 @@ export default async function GoalsPage() {
   const goals = await getAllGoals(financialProfile.id)
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4">
-      <section className="space-y-5">
-        <div className="flex justify-between flex-wrap gap-4">
-          <div className="max-w-80 space-y-1">
-            <h1 className="text-2xl font-semibold">Goals</h1>
-          </div>
-
-          <div className="flex gap-3 justify-end">
-            <AddGoalButton />
-          </div>
+    <section className="space-y-5">
+      <div className="flex justify-between flex-wrap gap-4">
+        <div className="max-w-80 space-y-1">
+          <h1 className="text-2xl font-semibold">Goals</h1>
         </div>
 
-        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-4">
-          {/* TODO: Add empty state */}
-          {goals.map(({ goal, totalContributionInPaisa }) => (
-            <GoalCard
-              key={goal.id}
-              goalAllocationInPaisa={cycle.goalAllocationInPaisa}
-              goal={goal}
-              totalContributionInPaisa={totalContributionInPaisa}
-            />
-          ))}
+        <div className="flex gap-3 justify-end">
+          <AddGoalButton />
         </div>
-      </section>
-    </main>
+      </div>
+
+      <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-4">
+        {/* TODO: Add empty state */}
+        {goals.map(({ goal, totalContributionInPaisa }) => (
+          <GoalCard
+            key={goal.id}
+            goalAllocationInPaisa={cycle.goalAllocationInPaisa}
+            goal={goal}
+            totalContributionInPaisa={totalContributionInPaisa}
+          />
+        ))}
+      </div>
+    </section>
   )
 }

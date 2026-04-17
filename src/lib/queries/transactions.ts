@@ -12,10 +12,12 @@ export async function getTransactionsByFinancialProfileId(
 }
 
 export async function getTotalDebitTransactionAmountByCycle(cycleId: string) {
-  const [{ amount }] = await db
+  const [row] = await db
     .select({ amount: sum(transaction.amountInPaisa) })
     .from(transaction)
     .where(and(eq(transaction.cycleId, cycleId), eq(transaction.type, "debit")))
+
+  const amount = row?.amount
 
   return Number(amount) ?? 0
 }

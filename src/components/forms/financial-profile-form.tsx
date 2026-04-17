@@ -84,198 +84,204 @@ export default function FinancialProfileForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
-      <FieldSet>
-        {/* Income */}
-        <Controller
-          control={control}
-          name="monthlyIncome"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>
-                Monthly Income (INR)
-                <span className="text-destructive">*</span>
-              </FieldLabel>
-
-              <NumberInput
-                id={field.name}
-                min={0}
-                value={(field.value as number | null) ?? null}
-                onChange={field.onChange}
-                aria-invalid={fieldState.invalid}
-                disabled={isSubmitting}
-                placeholder="25000"
-                autoComplete="off"
-              />
-
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        {/* Expense */}
-        <Controller
-          control={control}
-          name="fixedMonthlyExpenses"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>
-                Monthly Expenses (INR)
-                <span className="text-destructive">*</span>
-              </FieldLabel>
-
-              <NumberInput
-                id={field.name}
-                min={0}
-                value={(field.value as number | null) ?? null}
-                onChange={field.onChange}
-                aria-invalid={fieldState.invalid}
-                disabled={isSubmitting}
-                placeholder="10000"
-                autoComplete="off"
-              />
-
-              {fieldState.error ? (
-                <FieldError errors={[fieldState.error]} />
-              ) : (
-                <FieldDescription>
-                  Fixed monthly expenses that are necessary
-                </FieldDescription>
-              )}
-            </Field>
-          )}
-        />
-
-        {/* Cycle Day */}
-        <Controller
-          control={control}
-          name="cycleStartDay"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>
-                Cycle Start Day<span className="text-destructive">*</span>
-              </FieldLabel>
-
-              <Select
-                name={field.name}
-                value={field.value?.toString()}
-                onValueChange={(val) => field.onChange(Number(val))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger id={field.name} className="w-45">
-                  <SelectValue placeholder="Day" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {Array.from({ length: 31 }).map((_, i) => (
-                      <SelectItem key={i} value={`${i + 1}`}>
-                        {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-
-              {fieldState.error ? (
-                <FieldError errors={[fieldState.error]} />
-              ) : (
-                <FieldDescription>The day when month resets</FieldDescription>
-              )}
-            </Field>
-          )}
-        />
-
-        {/* Saving Rate */}
-        <Controller
-          control={control}
-          name="savingsRate"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <div className="flex items-center justify-between gap-2">
+    <div className="w-full max-w-lg">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FieldSet>
+          {/* Income */}
+          <Controller
+            control={control}
+            name="monthlyIncome"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.name}>
-                  Savings Rate (%)
+                  Monthly Income (INR)
                   <span className="text-destructive">*</span>
                 </FieldLabel>
-                <span className="text-sm text-muted-foreground">
-                  {field.value?.toString() || DEFAULT_SAVINGS_RATE}%
-                </span>
-              </div>
 
-              <Slider
-                defaultValue={[Number(DEFAULT_SAVINGS_RATE)]}
-                onChange={field.onChange}
-                max={100}
-                step={1}
-                disabled={isSubmitting}
-              />
+                <NumberInput
+                  id={field.name}
+                  min={0}
+                  value={(field.value as number | null) ?? null}
+                  onChange={field.onChange}
+                  aria-invalid={fieldState.invalid}
+                  disabled={isSubmitting}
+                  placeholder="25000"
+                  autoComplete="off"
+                />
 
-              {fieldState.error ? (
                 <FieldError errors={[fieldState.error]} />
-              ) : (
-                <FieldDescription>
-                  % of the available surplus allocated towards goals
-                </FieldDescription>
-              )}
+              </Field>
+            )}
+          />
+
+          {/* Expense */}
+          <Controller
+            control={control}
+            name="fixedMonthlyExpenses"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>
+                  Monthly Expenses (INR)
+                  <span className="text-destructive">*</span>
+                </FieldLabel>
+
+                <NumberInput
+                  id={field.name}
+                  min={0}
+                  value={(field.value as number | null) ?? null}
+                  onChange={field.onChange}
+                  aria-invalid={fieldState.invalid}
+                  disabled={isSubmitting}
+                  placeholder="10000"
+                  autoComplete="off"
+                />
+
+                {fieldState.error ? (
+                  <FieldError errors={[fieldState.error]} />
+                ) : (
+                  <FieldDescription>
+                    Fixed monthly expenses that are necessary
+                  </FieldDescription>
+                )}
+              </Field>
+            )}
+          />
+
+          {/* Cycle Day */}
+          <Controller
+            control={control}
+            name="cycleStartDay"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>
+                  Cycle Start Day<span className="text-destructive">*</span>
+                </FieldLabel>
+
+                <Select
+                  name={field.name}
+                  value={field.value?.toString()}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger id={field.name} className="w-45">
+                    <SelectValue placeholder="Day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {Array.from({ length: 31 }).map((_, i) => (
+                        <SelectItem key={i} value={`${i + 1}`}>
+                          {i + 1}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
+                {fieldState.error ? (
+                  <FieldError errors={[fieldState.error]} />
+                ) : (
+                  <FieldDescription>The day when month resets</FieldDescription>
+                )}
+              </Field>
+            )}
+          />
+
+          {/* Saving Rate */}
+          <Controller
+            control={control}
+            name="savingsRate"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel htmlFor={field.name}>
+                    Savings Rate (%)
+                    <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <span className="text-sm text-muted-foreground">
+                    {field.value?.toString() || DEFAULT_SAVINGS_RATE}%
+                  </span>
+                </div>
+
+                <Slider
+                  defaultValue={[Number(DEFAULT_SAVINGS_RATE)]}
+                  onChange={field.onChange}
+                  max={100}
+                  step={1}
+                  disabled={isSubmitting}
+                />
+
+                {fieldState.error ? (
+                  <FieldError errors={[fieldState.error]} />
+                ) : (
+                  <FieldDescription>
+                    % of the available surplus allocated towards goals
+                  </FieldDescription>
+                )}
+              </Field>
+            )}
+          />
+
+          {/* Current Balance */}
+          <Controller
+            control={control}
+            name="currentBalance"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>
+                  {financialProfile
+                    ? "Unallocated Fund (Optional)"
+                    : "Current Balance (Optional)"}
+                </FieldLabel>
+
+                <NumberInput
+                  id={field.name}
+                  min={0}
+                  value={(field.value as number | null) ?? null}
+                  onChange={field.onChange}
+                  aria-invalid={fieldState.invalid}
+                  disabled={isSubmitting}
+                  placeholder="3000"
+                  autoComplete="off"
+                />
+
+                {fieldState.error ? (
+                  <FieldError errors={[fieldState.error]} />
+                ) : (
+                  <FieldDescription>Current existing balance</FieldDescription>
+                )}
+              </Field>
+            )}
+          />
+
+          <FieldGroup>
+            <Field>
+              <Button
+                type="submit"
+                disabled={
+                  watch("monthlyIncome") == null ||
+                  watch("fixedMonthlyExpenses") == null ||
+                  isSubmitting ||
+                  !isDirty
+                }
+              >
+                {isSubmitting && (
+                  <>
+                    <Spinner data-icon="inline-start" />
+                    {financialProfile ? "Saving" : "Setting up"}
+                  </>
+                )}
+                {!isSubmitting
+                  ? financialProfile
+                    ? "Save changes"
+                    : "Continue"
+                  : null}
+              </Button>
+
+              {!financialProfile && <SignoutButton />}
             </Field>
-          )}
-        />
-
-        {/* Current Balance */}
-        <Controller
-          control={control}
-          name="currentBalance"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>
-                {financialProfile
-                  ? "Unallocated Fund (Optional)"
-                  : "Current Balance (Optional)"}
-              </FieldLabel>
-
-              <NumberInput
-                id={field.name}
-                min={0}
-                value={(field.value as number | null) ?? null}
-                onChange={field.onChange}
-                aria-invalid={fieldState.invalid}
-                disabled={isSubmitting}
-                placeholder="3000"
-                autoComplete="off"
-              />
-
-              {fieldState.error ? (
-                <FieldError errors={[fieldState.error]} />
-              ) : (
-                <FieldDescription>Current existing balance</FieldDescription>
-              )}
-            </Field>
-          )}
-        />
-
-        <FieldGroup>
-          <Field>
-            <Button
-              type="submit"
-              disabled={
-                watch("monthlyIncome") == null ||
-                watch("fixedMonthlyExpenses") == null ||
-                isSubmitting ||
-                !isDirty
-              }
-            >
-              {isSubmitting && (
-                <>
-                  <Spinner data-icon="inline-start" />
-                  {financialProfile ? "Saving" : "Setting up"}
-                </>
-              )}
-              {!isSubmitting && financialProfile ? "Save changes" : "Continue"}
-            </Button>
-
-            {!financialProfile && <SignoutButton />}
-          </Field>
-        </FieldGroup>
-      </FieldSet>
-    </form>
+          </FieldGroup>
+        </FieldSet>
+      </form>
+    </div>
   )
 }

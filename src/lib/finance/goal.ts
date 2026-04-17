@@ -16,7 +16,7 @@ export async function getGoalProgress(goalId: string) {
     .where(eq(goalContribution.goalId, goalId))
 
   const totalSaved = contributions[0]?.total ?? 0
-  const target = goal.targetAmountInPaisa
+  const target = goal.goal.targetAmountInPaisa
 
   const progressPercentage = target === 0 ? 0 : (totalSaved / target) * 100
 

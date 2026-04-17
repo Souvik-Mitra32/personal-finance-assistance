@@ -1,5 +1,8 @@
 export const DEFAULT_RESEND_EMAIL_TIMER = 30 // in seconds
 
+export const MAXIMUM_TRANSACTIONS_IN_DASHBOARD = 5
+export const MAXIMUM_GOALS_IN_DASHBOARD = 5
+
 export const DEFAULT_SAVINGS_RATE = 30
 export const DEFAULT_CYCLE_START_DAY = 5
 

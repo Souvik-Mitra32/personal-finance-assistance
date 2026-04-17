@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm"
+import { and, desc, eq, sql } from "drizzle-orm"
 import { db } from "../drizzle/db"
 import { goal, goalContribution } from "../drizzle/schema"
 
@@ -12,6 +12,7 @@ export async function getAllGoals(financialProfileId: string) {
     .leftJoin(goalContribution, eq(goalContribution.goalId, goal.id))
     .where(and(eq(goal.financialProfileId, financialProfileId)))
     .groupBy(goal.id)
+    .orderBy(desc(goal.targetDate), desc(goal.status))
 }
 
 export async function getActiveGoals(financialProfileId: string) {

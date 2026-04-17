@@ -1,6 +1,4 @@
-import Link from "next/link"
 import { redirect } from "next/navigation"
-import { format } from "date-fns"
 
 import { getCurrentUser } from "@/lib/queries/auth"
 import { getFinancialProfileByUserId } from "@/lib/queries/financial-profiles"
@@ -8,18 +6,18 @@ import { getFinancialProfileByUserId } from "@/lib/queries/financial-profiles"
 import { getOrCreateMonthlyCycle } from "@/lib/finance/monthly-cycle"
 import { getCycleFinancialState } from "@/lib/finance/financial-state"
 import { getTransactionsByFinancialProfileId } from "@/lib/queries/transactions"
+import { getSpendingByCategory } from "@/lib/queries/expenses"
 
 import { formatCurrencyFromPaisa } from "@/lib/formatters"
 
-import { Progress } from "@/components/ui/progress"
 import TransactionsTable from "@/components/tables/transactions-table"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import GoalsTable from "@/components/tables/goals-table"
+import EmptyData from "@/components/empty-data"
+import { Progress } from "@/components/ui/progress"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowLeftRight, Flag } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { getAllGoals } from "@/lib/queries/goals"
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()
@@ -36,6 +34,11 @@ export default async function DashboardPage() {
   const cycleState = await getCycleFinancialState(monthlyCycle.id)
   if (cycleState == null) redirect("/")
 
+  const [goals, spendings] = await Promise.all([
+    getAllGoals(financialProfile.id),
+    getSpendingByCategory(financialProfile.id, monthlyCycle),
+  ])
+
   const spent = cycleState.totalDebitAmountInPaisa
   const budget = cycleState.spendingBudgetInPaisa
   const usage = getUsageData(
@@ -44,75 +47,145 @@ export default async function DashboardPage() {
   )
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4">
-      <section className="space-y-5">
-        <div className="max-w-80 space-y-1">
-          <h1 className="text-2xl font-semibold">Dashbaord</h1>
-        </div>
+    <section className="space-y-5">
+      <div className="max-w-80 space-y-1">
+        <h1 className="text-2xl font-semibold">Dashbaord</h1>
+      </div>
 
-        {/* 1. Safe to Spend */}
-        <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Safe to Spend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-semibold">
+      <div className="grid lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3 space-y-6 min-w-0">
+          {/* Safe to Spend */}
+          <div className="space-y-2">
+            <div className="font-medium">Safe to Spend</div>
+
+            <div className="flex flex-wrap items-baseline space-x-2">
+              <div className="text-4xl">
                 {formatCurrencyFromPaisa(cycleState.safeToSpendInPaisa)}
               </div>
-
-              <p className="text-sm text-muted-foreground">{usage.details}</p>
-
-              <div className="text-sm mt-1">
-                {formatCurrencyFromPaisa(spent)} /{" "}
-                {formatCurrencyFromPaisa(budget)}
+              <div className="text-muted-foreground text-sm">
+                {usage.details}
               </div>
+            </div>
 
-              <Progress value={usage.usagePercentage} />
+            <div className="text-sm">
+              {formatCurrencyFromPaisa(spent)} /{" "}
+              {formatCurrencyFromPaisa(budget)}
+            </div>
 
-              <div className="flex justify-between text-sm mt-2">
-                <span>{usage.status}</span>
-                <span>{usage.usagePercentage.toFixed(0)}%</span>
+            <Progress value={usage.usagePercentage} />
+
+            <div className="flex justify-between text-sm">
+              <Badge variant="outline">{usage.status}</Badge>
+              <span>{usage.usagePercentage.toFixed(0)}%</span>
+            </div>
+          </div>
+
+          {/* Goal progress */}
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <div className="font-medium">Goal Progress</div>
+            </div>
+
+            {goals.length > 0 ? (
+              <GoalsTable goals={goals} />
+            ) : (
+              <EmptyData
+                title="No goals found"
+                description="No goals yet. Lets add your first goal."
+                icon={<Flag />}
+                className="border border-dashed"
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 space-y-6 min-w-0">
+          {/* Spendings */}
+          <div className="@container lg:col-span-2 space-y-2">
+            <div className="space-y-1">
+              <div className="font-medium">Spendings</div>
+              <div className="text-sm text-muted-foreground">
+                Expenses by categories this month
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* 2. Cycle Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Cycle Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1 text-sm">
-              <div>
-                {format(monthlyCycle.cycleStartDate, "do MMM")} -{" "}
-                {format(monthlyCycle.cycleEndDate, "do MMM")}
+            <div className="grid @[596px]:grid-cols-3 @[396px]:grid-cols-2 gap-4">
+              {spendings.map(({ category, amountInPaisa }) => (
+                <Card key={category}>
+                  <CardContent className="space-y-2">
+                    <div className="text-muted-foreground">
+                      {category.slice(0, 1).toUpperCase()}
+                      {category.slice(1).replace("_", " ")}
+                    </div>
+                    <div className="flex justify-between items-center gap-4">
+                      <div className="text-lg font-medium mr-auto">
+                        {formatCurrencyFromPaisa(Number(amountInPaisa) ?? 0)}
+                      </div>
+                      {/* <div className="flex items-center gap-1">
+                        <ArrowUp size={14} />
+                        <span className="text-sm">8%</span>
+                      </div> */}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Configurations */}
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <div className="font-medium">Configurations</div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center space-x-2">
+                <span className="text-muted-foreground">Income</span>
+                <span>
+                  {formatCurrencyFromPaisa(
+                    financialProfile.monthlyIncomeInPaisa,
+                  )}
+                </span>
               </div>
+              <div className="flex justify-between items-center space-x-2">
+                <span className="text-muted-foreground">Expense</span>
+                <span>
+                  {formatCurrencyFromPaisa(
+                    financialProfile.fixedMonthlyExpensesInPaisa,
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center space-x-2">
+                <span className="text-muted-foreground">Saving Rate</span>
+                <span>{financialProfile.savingsRate}%</span>
+              </div>
+            </div>
+          </div>
 
-              <div>Budget: {formatCurrencyFromPaisa(budget)}</div>
+          {/* Transactions */}
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <div className="font-medium">Recent Transactions</div>
+            </div>
 
-              <div>Spent: {formatCurrencyFromPaisa(spent)}</div>
-            </CardContent>
-          </Card>
-
-          {/* 3. Recent Transactions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardAction>
-                <Link href="/transactions">View All</Link>
-              </CardAction>
-            </CardHeader>
-            <CardContent>
+            {transactions.length > 0 ? (
               <TransactionsTable
-                transactions={transactions.slice(0, 5)}
                 financialProfileId={financialProfile.id}
                 cycleStartDay={financialProfile.cycleStartDay}
+                transactions={transactions}
               />
-            </CardContent>
-          </Card>
+            ) : (
+              <EmptyData
+                title="No transactions found"
+                description="No transactions yet. Lets add your first transaction."
+                icon={<ArrowLeftRight />}
+                className="border border-dashed"
+              />
+            )}
+          </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
   )
 }
 
